@@ -40,7 +40,7 @@ export default function Home() {
       <div style={{background:'#fff',borderRadius:'16px',border:'1px solid #E2E8F0',padding:'48px 40px',maxWidth:'480px',width:'100%',textAlign:'center'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',marginBottom:'28px'}}>
           <svg width="32" height="32" viewBox="0 0 80 80"><rect width="80" height="80" rx="16" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M49.5 60l4 4 8-9" stroke="#185FA5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-          <div style={{fontSize:'16px',fontWeight:'700',color:'#0D1B2A'}}>Sign<span style={{color:'#185FA5'}}>Permit</span> <span style={{fontSize:'11px',color:'#9BA8B4',fontWeight:'400'}}>Pro</span></div>
+          <div style={{fontSize:'16px',fontWeight:'700',color:'#0D1B2A'}}>Sign<span style={{color:'#185FA5'}}>Code</span> <span style={{fontSize:'11px',color:'#9BA8B4',fontWeight:'400'}}>Pro</span></div>
         </div>
         <div style={{width:'56px',height:'56px',borderRadius:'14px',background:'#EAF3DE',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px'}}>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#3B6D11" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 14l6 6 12-12"/></svg>
@@ -54,9 +54,9 @@ export default function Home() {
         </div>
         <p style={{fontSize:'13px',color:'#5A6B7A',lineHeight:'1.6',marginBottom:'20px'}}>Share your referral link to move up — each sign company you refer moves you up 5 spots.</p>
         <div style={{background:'#F4F7FA',borderRadius:'8px',padding:'10px 14px',fontSize:'12px',color:'#185FA5',wordBreak:'break-all',marginBottom:'20px'}}>
-          signpermit-pro.vercel.app?ref={result.referralCode}
+          signcodepro.com?ref={result.referralCode}
         </div>
-        <button onClick={() => {navigator.clipboard.writeText(`https://signpermit-pro.vercel.app?ref=${result.referralCode}`)}} style={{width:'100%',padding:'11px',background:'#185FA5',color:'#fff',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'500',cursor:'pointer'}}>
+        <button onClick={() => {navigator.clipboard.writeText(`https://signcodepro.com?ref=${result.referralCode}`)}} style={{width:'100%',padding:'11px',background:'#185FA5',color:'#fff',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'500',cursor:'pointer'}}>
           Copy referral link
         </button>
       </div>
@@ -70,7 +70,7 @@ export default function Home() {
         <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'36px'}}>
           <svg width="36" height="36" viewBox="0 0 80 80"><rect width="80" height="80" rx="16" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M49.5 60l4 4 8-9" stroke="#185FA5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
           <div>
-            <div style={{fontSize:'17px',fontWeight:'700',color:'#fff',lineHeight:'1'}}>Sign<span style={{color:'#85B7EB'}}>Permit</span></div>
+            <div style={{fontSize:'17px',fontWeight:'700',color:'#fff',lineHeight:'1'}}>Sign<span style={{color:'#85B7EB'}}>Code</span></div>
             <div style={{fontSize:'9px',color:'rgba(255,255,255,0.3)',letterSpacing:'.06em',marginTop:'2px'}}>PRO</div>
           </div>
         </div>
@@ -81,7 +81,7 @@ export default function Home() {
         </div>
 
         <h1 style={{fontSize:'32px',fontWeight:'700',color:'#fff',lineHeight:'1.2',marginBottom:'16px'}}>Be first in line<br/>when we <span style={{color:'#85B7EB'}}>launch</span></h1>
-        <p style={{fontSize:'14px',color:'rgba(255,255,255,0.5)',lineHeight:'1.7',marginBottom:'36px',maxWidth:'380px'}}>SignPermit Pro is opening to a limited group of Florida sign companies first. Join the waitlist to get early access and founding member pricing.</p>
+        <p style={{fontSize:'14px',color:'rgba(255,255,255,0.5)',lineHeight:'1.7',marginBottom:'36px',maxWidth:'380px'}}>SignCode Pro is opening to a limited group of Florida sign companies first. Join the waitlist to get early access and founding member pricing.</p>
 
         {[
           {title:'Founding member pricing', desc:'Lock in 30% off Professional forever.'},

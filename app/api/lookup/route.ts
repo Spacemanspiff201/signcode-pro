@@ -443,7 +443,7 @@ async function fetchSource(url: string): Promise<string> {
     const contentType = res.headers.get("content-type") || "";
     if (contentType.includes("pdf")) {
       const buffer = await res.arrayBuffer();
-      const pdfParse = (await import("pdf-parse")).default;
+      const pdfParse = await import("pdf-parse");
       const data = await pdfParse(Buffer.from(buffer));
       return data.text.slice(0, 15000);
     }

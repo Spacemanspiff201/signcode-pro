@@ -61,9 +61,9 @@ export default function Home() {
         <div style={{ position:'relative', zIndex:2, maxWidth:'1100px', margin:'0 auto', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'56px', alignItems:'flex-start' }}>
           {/* LEFT */}
           <div>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:'7px', padding:'5px 14px', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', borderRadius:'20px', marginBottom:'26px' }}>
-              <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#60A5FA' }} />
-              <span style={{ fontSize:'12px', color:'#93C5FD', fontWeight:'500' }}>Built for the commercial sign industry</span>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:'7px', padding:'5px 14px', background:'#fff', border:'none', borderRadius:'20px', marginBottom:'26px' }}>
+              <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#3B82F6' }} />
+              <span style={{ fontSize:'12px', color:'#1E3A5F', fontWeight:'600' }}>Built for the commercial sign industry</span>
             </div>
             <h1 style={{ fontSize:'48px', fontWeight:'800', color:'#fff', lineHeight:'1.1', letterSpacing:'-.8px', marginBottom:'20px' }}>
               Enter the address.<br />
@@ -89,9 +89,9 @@ export default function Home() {
           {/* RIGHT — floating UI */}
           <div style={{ position:'relative', paddingTop:'8px' }}>
             {/* Float card top right */}
-            <div style={{ position:'absolute', top:'-16px', right:'-16px', background:'rgba(16,185,129,.1)', border:'1px solid rgba(16,185,129,.2)', borderRadius:'12px', padding:'12px 16px', zIndex:10, animation:'float1 5s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
+            <div style={{ position:'absolute', top:'-20px', right:'-12px', background:'rgba(16,185,129,.15)', border:'1px solid rgba(16,185,129,.3)', borderRadius:'12px', padding:'11px 15px', zIndex:10, animation:'float1 5s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
               <div style={{ fontSize:'10px', color:'#6EE7B7', fontWeight:'600', marginBottom:'2px' }}>Avg. research time saved</div>
-              <div style={{ fontSize:'22px', fontWeight:'800', color:'#fff' }}>3.2 hrs</div>
+              <div style={{ fontSize:'20px', fontWeight:'800', color:'#fff' }}>3.2 hrs</div>
               <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>per jurisdiction lookup</div>
             </div>
 

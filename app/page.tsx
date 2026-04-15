@@ -109,7 +109,7 @@ export default function Home() {
                     <div style={{ fontSize:'15px', fontWeight:'700', color:'#fff', marginBottom:'3px' }}>Miami-Dade County, FL</div>
                     <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>Ch. 33, Article VI · Last referenced Apr 2026</div>
                   </div>
-                  <span style={{ fontSize:'10px', padding:'3px 9px', borderRadius:'20px', background:'rgba(16,185,129,.15)', color:'#6EE7B7', border:'1px solid rgba(16,185,129,.2)', fontWeight:'600', flexShrink:0, marginLeft:'8px' }}>✓ Verified</span>
+                  <span style={{ fontSize:'10px', padding:'3px 10px', borderRadius:'20px', background:'#fff', color:'#0D1B2A', fontWeight:'700', flexShrink:0, marginLeft:'8px' }}>✓ Verified</span>
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'7px', marginBottom:'14px' }}>
                   {[
@@ -144,22 +144,24 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Float card bottom left */}
-            <div style={{ position:'absolute', bottom:'32px', left:'-24px', background:'rgba(99,102,241,.1)', border:'1px solid rgba(99,102,241,.22)', borderRadius:'12px', padding:'12px 16px', zIndex:10, animation:'float2 6s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
-              <div style={{ fontSize:'10px', color:'#A5B4FC', marginBottom:'8px', fontWeight:'500' }}>Active permit jobs</div>
-              {[
-                { name:'Broward Co.', pct:75, color:'#3B82F6' },
-                { name:'Miami-Dade', pct:100, color:'#10B981' },
-                { name:'Pompano Bch', pct:30, color:'#F59E0B' },
-              ].map(r => (
-                <div key={r.name} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'10px', color:'rgba(255,255,255,.4)', marginBottom:'5px' }}>
-                  <span style={{ minWidth:'72px' }}>{r.name}</span>
-                  <div style={{ flex:1, height:'4px', background:'rgba(255,255,255,.08)', borderRadius:'2px', minWidth:'60px' }}>
-                    <div style={{ height:'100%', width:`${r.pct}%`, background:r.color, borderRadius:'2px' }} />
+            {/* Jobs card — sits below main card, not overlapping */}
+            <div style={{ marginTop:'12px', display:'flex', justifyContent:'flex-start' }}>
+              <div style={{ background:'rgba(99,102,241,.12)', border:'1px solid rgba(99,102,241,.25)', borderRadius:'12px', padding:'12px 16px', animation:'float2 6s ease-in-out infinite', backdropFilter:'blur(8px)', display:'inline-block' }}>
+                <div style={{ fontSize:'10px', color:'#A5B4FC', marginBottom:'8px', fontWeight:'600' }}>Active permit jobs</div>
+                {[
+                  { name:'Broward Co.', pct:75, color:'#3B82F6' },
+                  { name:'Miami-Dade', pct:100, color:'#10B981' },
+                  { name:'Pompano Bch', pct:30, color:'#F59E0B' },
+                ].map(r => (
+                  <div key={r.name} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'10px', color:'rgba(255,255,255,.5)', marginBottom:'5px' }}>
+                    <span style={{ minWidth:'72px' }}>{r.name}</span>
+                    <div style={{ flex:1, height:'4px', background:'rgba(255,255,255,.08)', borderRadius:'2px', minWidth:'80px' }}>
+                      <div style={{ height:'100%', width:`${r.pct}%`, background:r.color, borderRadius:'2px' }} />
+                    </div>
+                    <span style={{ minWidth:'20px' }}>{r.pct === 100 ? '✓' : `${r.pct}%`}</span>
                   </div>
-                  <span>{r.pct === 100 ? '✓' : `${r.pct}%`}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -167,11 +169,11 @@ export default function Home() {
 
       {/* LOGO MARQUEE */}
       <div style={{ borderTop:'1px solid rgba(255,255,255,.06)', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'28px 0', overflow:'hidden', marginTop:'60px' }}>
-        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', textAlign:'center', marginBottom:'18px', textTransform:'uppercase', letterSpacing:'.08em' }}>Used by sign professionals at</div>
+        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.35)', textAlign:'center', marginBottom:'18px', textTransform:'uppercase', letterSpacing:'.08em' }}>Used by sign professionals at</div>
         <div style={{ overflow:'hidden', position:'relative' }}>
           <div style={{ display:'flex', gap:'0', animation:'marquee 22s linear infinite', width:'max-content' }}>
             {['FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now','FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now'].map((n,i) => (
-              <span key={i} style={{ padding:'6px 24px', borderRight:'1px solid rgba(255,255,255,.06)', fontSize:'12px', color:'rgba(255,255,255,.25)', fontWeight:'500', whiteSpace:'nowrap' }}>{n}</span>
+              <span key={i} style={{ padding:'6px 24px', borderRight:'1px solid rgba(255,255,255,.08)', fontSize:'12px', color:'rgba(255,255,255,.4)', fontWeight:'600', whiteSpace:'nowrap' }}>{n}</span>
             ))}
           </div>
         </div>
@@ -180,9 +182,9 @@ export default function Home() {
       {/* PROBLEM */}
       <section style={{ padding:'80px 48px', maxWidth:'1100px', margin:'0 auto' }}>
         <div style={{ textAlign:'center', marginBottom:'52px' }}>
-          <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>The problem</div>
+          <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>The problem</div>
           <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'14px', lineHeight:'1.2' }}>Sign permitting wastes too much<br />of your team's time</h2>
-          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.4)', lineHeight:'1.75', maxWidth:'540px', margin:'0 auto' }}>Higher-paid staff spend hours digging through municipal websites. Newer people struggle in unfamiliar jurisdictions. Rejected submittals add weeks. The information exists — it's just buried.</p>
+          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.55)', lineHeight:'1.75', maxWidth:'540px', margin:'0 auto' }}>Higher-paid staff spend hours digging through municipal websites. Newer people struggle in unfamiliar jurisdictions. Rejected submittals add weeks. The information exists — it's just buried.</p>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
           {[
@@ -192,7 +194,7 @@ export default function Home() {
           ].map(s => (
             <div key={s.stat} style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'28px 24px', textAlign:'center' }}>
               <div style={{ fontSize:'38px', fontWeight:'800', color:s.color, marginBottom:'10px', letterSpacing:'-.5px' }}>{s.stat}</div>
-              <div style={{ fontSize:'13px', color:'rgba(255,255,255,.4)', lineHeight:'1.6' }}>{s.label}</div>
+              <div style={{ fontSize:'13px', color:'rgba(255,255,255,.6)', lineHeight:'1.6' }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -202,7 +204,7 @@ export default function Home() {
       <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'52px' }}>
-            <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>How it works</div>
+            <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>How it works</div>
             <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', lineHeight:'1.2' }}>From address to action in seconds</h2>
           </div>
           <div style={{ display:'flex', flexDirection:'column', gap:'12px', maxWidth:'720px', margin:'0 auto' }}>
@@ -213,10 +215,10 @@ export default function Home() {
               { n:'04', title:'Track every job from research to approval', desc:'Every permit job lives in one place. Your whole team sees the status. Nothing falls through the cracks.' },
             ].map(s => (
               <div key={s.n} style={{ display:'flex', gap:'20px', background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px 24px', alignItems:'flex-start' }}>
-                <div style={{ fontSize:'12px', fontWeight:'700', color:'#3B82F6', minWidth:'28px', paddingTop:'2px' }}>{s.n}</div>
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#0D1B2A', minWidth:'32px', height:'24px', background:'#fff', borderRadius:'20px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:'1px' }}>{s.n}</div>
                 <div>
                   <div style={{ fontSize:'15px', fontWeight:'600', color:'#fff', marginBottom:'6px' }}>{s.title}</div>
-                  <div style={{ fontSize:'13px', color:'rgba(255,255,255,.4)', lineHeight:'1.65' }}>{s.desc}</div>
+                  <div style={{ fontSize:'13px', color:'rgba(255,255,255,.55)', lineHeight:'1.65' }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -227,7 +229,7 @@ export default function Home() {
       {/* FEATURES */}
       <section style={{ padding:'80px 48px', maxWidth:'1100px', margin:'0 auto' }}>
         <div style={{ textAlign:'center', marginBottom:'52px' }}>
-          <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>The value</div>
+          <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>The value</div>
           <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', lineHeight:'1.2' }}>Efficiency and reduction.<br />That's the whole formula.</h2>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'14px' }}>
@@ -240,9 +242,9 @@ export default function Home() {
             { icon:'📞', title:'Direct contact info', desc:'Right department, right number, right portal. Every time.', c:'rgba(20,184,166,.15)' },
           ].map(f => (
             <div key={f.title} className="feat-card" style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px' }}>
-              <div style={{ width:'40px', height:'40px', borderRadius:'10px', background:f.c, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'14px', fontSize:'18px' }}>{f.icon}</div>
+              <div style={{ width:'44px', height:'44px', borderRadius:'12px', background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'14px', fontSize:'20px' }}>{f.icon}</div>
               <div style={{ fontSize:'14px', fontWeight:'700', color:'#fff', marginBottom:'7px' }}>{f.title}</div>
-              <div style={{ fontSize:'12px', color:'rgba(255,255,255,.38)', lineHeight:'1.6' }}>{f.desc}</div>
+              <div style={{ fontSize:'12px', color:'rgba(255,255,255,.5)', lineHeight:'1.6' }}>{f.desc}</div>
             </div>
           ))}
         </div>
@@ -252,7 +254,7 @@ export default function Home() {
       <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'52px' }}>
-            <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>Pricing</div>
+            <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>Pricing</div>
             <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'12px' }}>Simple, justifiable pricing</h2>
             <p style={{ fontSize:'14px', color:'rgba(255,255,255,.35)' }}>One rejected submittal costs more than a year of SignCode Pro.</p>
           </div>
@@ -263,8 +265,8 @@ export default function Home() {
               { name:'Enterprise', price:'Custom', period:'', desc:'For large operations and multi-location shops', features:['Everything in Professional','Custom jurisdictions','API access','Dedicated support','Team training'], highlight:false },
             ].map(p => (
               <div key={p.name} style={{ position:'relative', padding:'28px', background:p.highlight ? 'rgba(59,130,246,.1)' : 'rgba(255,255,255,.03)', borderRadius:'16px', border:p.highlight ? '1px solid rgba(59,130,246,.4)' : '1px solid rgba(255,255,255,.07)' }}>
-                {p.highlight && <div style={{ position:'absolute', top:'-12px', left:'50%', transform:'translateX(-50%)', background:'#3B82F6', color:'#fff', fontSize:'11px', fontWeight:'600', padding:'3px 14px', borderRadius:'20px', whiteSpace:'nowrap' }}>Most popular</div>}
-                <div style={{ fontSize:'13px', fontWeight:'600', color:p.highlight ? '#93C5FD' : 'rgba(255,255,255,.4)', marginBottom:'8px' }}>{p.name}</div>
+                {p.highlight && <div style={{ position:'absolute', top:'-12px', left:'50%', transform:'translateX(-50%)', background:'#fff', color:'#0D1B2A', fontSize:'11px', fontWeight:'700', padding:'4px 16px', borderRadius:'20px', whiteSpace:'nowrap' }}>Most popular</div>}
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#0D1B2A', marginBottom:'12px', display:'inline-block', background:'#fff', padding:'4px 12px', borderRadius:'20px' }}>{p.name}</div>
                 <div style={{ display:'flex', alignItems:'baseline', gap:'3px', marginBottom:'8px' }}>
                   <span style={{ fontSize:'34px', fontWeight:'800', color:'#fff' }}>{p.price}</span>
                   <span style={{ fontSize:'13px', color:'rgba(255,255,255,.3)' }}>{p.period}</span>
@@ -323,7 +325,7 @@ export default function Home() {
         </div>
         <div style={{ display:'flex', gap:'20px' }}>
           {[['Lookup tool','/lookup'],['Job tracker','/jobs'],['Waitlist','/waitlist']].map(([l,h]) => (
-            <a key={l} href={h} style={{ fontSize:'12px', color:'rgba(255,255,255,.25)', textDecoration:'none' }}>{l}</a>
+            <a key={l} href={h} style={{ fontSize:'12px', color:'rgba(255,255,255,.4)', textDecoration:'none' }}>{l}</a>
           ))}
         </div>
         <div style={{ fontSize:'11px', color:'rgba(255,255,255,.2)' }}>© 2026 SignCode Pro. All rights reserved.</div>

@@ -17,213 +17,316 @@ export default function Home() {
         body: JSON.stringify({ email }),
       });
       setSubmitted(true);
-    } catch {
-      setSubmitted(true);
-    }
+    } catch { setSubmitted(true); }
     setLoading(false);
   }
 
   return (
-    <main style={{ fontFamily: 'Arial, Helvetica, sans-serif', background: '#F4F7FA', minHeight: '100vh' }}>
-      <nav style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="28" height="28" viewBox="0 0 80 80"><rect width="80" height="80" rx="16" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M49.5 60l4 4 8-9" stroke="#185FA5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-          <span style={{ fontSize: '15px', fontWeight: '700', color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> <span style={{ fontSize: '11px', color: '#9BA8B4', fontWeight: '400' }}>Pro</span></span>
+    <main style={{ fontFamily: "'Segoe UI', Arial, sans-serif", background: '#080F1E', minHeight: '100vh', overflowX: 'hidden' }}>
+      <style>{`
+        @keyframes pulse { 0%,100%{opacity:.18} 50%{opacity:.3} }
+        @keyframes float1 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-14px)} }
+        @keyframes float2 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
+        @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        .feat-card:hover { border-color:rgba(59,130,246,.4) !important; transform:translateY(-3px); }
+        .feat-card { transition: all .2s ease; }
+        .jur-card:hover { border-color:rgba(59,130,246,.35) !important; background:rgba(59,130,246,.05) !important; cursor:pointer; }
+        .jur-card { transition: all .15s ease; }
+        .nav-link:hover { color:#fff !important; }
+      `}</style>
+
+      {/* NAV */}
+      <nav style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 48px', borderBottom:'1px solid rgba(255,255,255,.06)', position:'sticky', top:0, zIndex:100, background:'rgba(8,15,30,.92)', backdropFilter:'blur(14px)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'9px' }}>
+          <svg width="28" height="28" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#3B82F6"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+          <span style={{ fontSize:'15px', fontWeight:'700', color:'#fff', letterSpacing:'-.3px' }}>Sign<span style={{ color:'#60A5FA' }}>Code</span> Pro</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <a href="/lookup" style={{ fontSize: '13px', color: '#5A6B7A', textDecoration: 'none' }}>Try lookup</a>
-          <a href="/waitlist" style={{ padding: '8px 18px', background: '#185FA5', color: '#fff', borderRadius: '8px', fontSize: '13px', fontWeight: '500', textDecoration: 'none' }}>Join waitlist</a>
+        <div style={{ display:'flex', gap:'28px' }}>
+          {['Product','Jurisdictions','Pricing'].map(l => (
+            <a key={l} className="nav-link" href="#" style={{ fontSize:'13px', color:'rgba(255,255,255,.45)', textDecoration:'none', transition:'color .15s' }}>{l}</a>
+          ))}
         </div>
+        <a href="/waitlist" style={{ padding:'9px 22px', background:'#3B82F6', color:'#fff', borderRadius:'9px', fontSize:'13px', fontWeight:'600', textDecoration:'none' }}>Join waitlist</a>
       </nav>
 
-      <section style={{ background: '#0D1B2A', padding: '80px 24px 90px' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', background: 'rgba(24,95,165,0.3)', color: '#85B7EB', fontSize: '12px', fontWeight: '500', marginBottom: '28px' }}>
-            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#85B7EB' }}></div>
-            Built for the sign industry
-          </div>
-          <h1 style={{ fontSize: '42px', fontWeight: '700', color: '#fff', lineHeight: '1.2', marginBottom: '20px' }}>
-            Enter the address.<br />Cut sign permit research time.
-          </h1>
-          <p style={{ fontSize: '16px', color: '#85B7EB', lineHeight: '1.7', marginBottom: '36px', maxWidth: '580px', margin: '0 auto 36px' }}>
-            SignCode Pro helps identify likely requirements, missing items, and code-backed next steps so your team can prepare cleaner submissions faster.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/waitlist" style={{ padding: '13px 28px', background: '#185FA5', color: '#fff', borderRadius: '8px', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>Join the waitlist</a>
-            <a href="/lookup" style={{ padding: '13px 28px', background: 'rgba(255,255,255,0.08)', color: '#fff', borderRadius: '8px', fontSize: '14px', fontWeight: '500', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)' }}>Try the lookup tool →</a>
-          </div>
-          <p style={{ fontSize: '11px', color: '#5A6B7A', marginTop: '20px' }}>Built to improve permit efficiency and reduce wasted time in the sign permit process.</p>
-        </div>
-      </section>
+      {/* HERO */}
+      <section style={{ position:'relative', padding:'88px 48px 0', overflow:'hidden', minHeight:'660px' }}>
+        {/* Glow blobs */}
+        <div style={{ position:'absolute', width:'700px', height:'700px', borderRadius:'50%', background:'radial-gradient(circle,rgba(59,130,246,.22) 0%,transparent 65%)', top:'-200px', left:'-160px', animation:'pulse 7s ease-in-out infinite', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', width:'550px', height:'550px', borderRadius:'50%', background:'radial-gradient(circle,rgba(99,102,241,.15) 0%,transparent 65%)', top:'-60px', right:'-80px', animation:'pulse 9s ease-in-out infinite', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', width:'350px', height:'350px', borderRadius:'50%', background:'radial-gradient(circle,rgba(59,130,246,.09) 0%,transparent 70%)', bottom:'60px', right:'32%', animation:'pulse 11s ease-in-out infinite', pointerEvents:'none' }} />
+        {/* Grid */}
+        <div style={{ position:'absolute', inset:0, opacity:.045, backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize:'48px 48px', pointerEvents:'none' }} />
 
-      <section style={{ padding: '72px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ fontSize: '11px', fontWeight: '700', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '16px' }}>The problem</div>
-          <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0D1B2A', marginBottom: '16px', lineHeight: '1.3' }}>Sign permitting wastes too much of your team's time</h2>
-          <p style={{ fontSize: '15px', color: '#5A6B7A', lineHeight: '1.7', marginBottom: '48px' }}>Higher-paid employees spend hours digging through municipal websites. Newer staff struggle in unfamiliar jurisdictions. Rejected submittals add weeks to jobs. The information exists — it's just buried.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-            {[
-              { stat: '2-4 hrs', label: 'Average research time per unfamiliar jurisdiction' },
-              { stat: '4-8 wks', label: 'Added to a job from a single rejected submittal' },
-              { stat: '100%', label: 'Of that time could be spent on billable work instead' },
-            ].map(({ stat, label }) => (
-              <div key={stat} style={{ padding: '24px', background: '#F4F7FA', borderRadius: '10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '32px', fontWeight: '700', color: '#185FA5', marginBottom: '8px' }}>{stat}</div>
-                <div style={{ fontSize: '12px', color: '#5A6B7A', lineHeight: '1.5' }}>{label}</div>
+        <div style={{ position:'relative', zIndex:2, maxWidth:'1100px', margin:'0 auto', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'56px', alignItems:'flex-start' }}>
+          {/* LEFT */}
+          <div>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:'7px', padding:'5px 14px', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', borderRadius:'20px', marginBottom:'26px' }}>
+              <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#60A5FA' }} />
+              <span style={{ fontSize:'12px', color:'#93C5FD', fontWeight:'500' }}>Built for the commercial sign industry</span>
+            </div>
+            <h1 style={{ fontSize:'48px', fontWeight:'800', color:'#fff', lineHeight:'1.1', letterSpacing:'-.8px', marginBottom:'20px' }}>
+              Enter the address.<br />
+              <span style={{ background:'linear-gradient(135deg,#60A5FA 0%,#818CF8 100%)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>Cut permit research time.</span>
+            </h1>
+            <p style={{ fontSize:'16px', color:'rgba(255,255,255,.5)', lineHeight:'1.75', marginBottom:'34px', maxWidth:'440px' }}>
+              SignCode Pro helps identify likely requirements, missing items, and code-backed next steps so your team can prepare cleaner submissions faster.
+            </p>
+            <div style={{ display:'flex', gap:'12px', marginBottom:'36px' }}>
+              <a href="/waitlist" style={{ padding:'13px 26px', background:'#3B82F6', color:'#fff', borderRadius:'10px', fontSize:'14px', fontWeight:'600', textDecoration:'none', display:'inline-block' }}>Join the waitlist</a>
+              <a href="/lookup" style={{ padding:'13px 26px', background:'rgba(255,255,255,.06)', color:'#fff', border:'1px solid rgba(255,255,255,.12)', borderRadius:'10px', fontSize:'14px', fontWeight:'500', textDecoration:'none', display:'inline-block' }}>Try the lookup tool →</a>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+              <div style={{ display:'flex' }}>
+                {['JS','MR','AL','TK','PW'].map((i,n) => (
+                  <div key={i} style={{ width:'28px', height:'28px', borderRadius:'50%', border:'2px solid #080F1E', background:['#1E3A5F','#1A3352','#1D2F4A','#162840','#1B3358'][n], display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', color:'#93C5FD', fontWeight:'700', marginLeft: n===0 ? 0 : '-7px', zIndex:5-n, position:'relative' }}>{i}</div>
+                ))}
               </div>
-            ))}
+              <span style={{ fontSize:'12px', color:'rgba(255,255,255,.4)' }}><strong style={{ color:'rgba(255,255,255,.65)' }}>Sign professionals</strong> already on the waitlist</span>
+            </div>
           </div>
-        </div>
-      </section>
 
-      <section style={{ padding: '72px 24px', background: '#F4F7FA' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '16px' }}>How it works</div>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0D1B2A', lineHeight: '1.3' }}>From address to action in seconds</h2>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {[
-              { step: '01', title: 'Enter the job address and sign details', desc: 'Tell us where the sign is going, what type it is, and the basic dimensions.' },
-              { step: '02', title: 'Get likely requirements instantly', desc: 'SignCode Pro identifies the jurisdiction and surfaces likely permit requirements, common red flags, and required documents for that sign type.' },
-              { step: '03', title: "See what's missing before you submit", desc: 'A checklist shows exactly what you need to gather. Check items off as you collect them. No more rejected submittals from missing documents.' },
-              { step: '04', title: 'Track every job from research to approval', desc: 'Every permit job lives in one place. Your whole team sees the status. Nothing falls through the cracks.' },
-            ].map(({ step, title, desc }) => (
-              <div key={step} style={{ display: 'flex', gap: '20px', background: '#fff', borderRadius: '10px', padding: '24px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#185FA5', minWidth: '28px' }}>{step}</div>
-                <div>
-                  <div style={{ fontSize: '15px', fontWeight: '600', color: '#0D1B2A', marginBottom: '6px' }}>{title}</div>
-                  <div style={{ fontSize: '13px', color: '#5A6B7A', lineHeight: '1.6' }}>{desc}</div>
+          {/* RIGHT — floating UI */}
+          <div style={{ position:'relative', paddingTop:'8px' }}>
+            {/* Float card top right */}
+            <div style={{ position:'absolute', top:'-16px', right:'-16px', background:'rgba(16,185,129,.1)', border:'1px solid rgba(16,185,129,.2)', borderRadius:'12px', padding:'12px 16px', zIndex:10, animation:'float1 5s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
+              <div style={{ fontSize:'10px', color:'#6EE7B7', fontWeight:'600', marginBottom:'2px' }}>Avg. research time saved</div>
+              <div style={{ fontSize:'22px', fontWeight:'800', color:'#fff' }}>3.2 hrs</div>
+              <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>per jurisdiction lookup</div>
+            </div>
+
+            {/* Main UI card */}
+            <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.1)', borderRadius:'16px', overflow:'hidden' }}>
+              <div style={{ background:'rgba(255,255,255,.05)', padding:'11px 16px', display:'flex', alignItems:'center', gap:'8px', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
+                <div style={{ display:'flex', gap:'5px' }}>
+                  {['#FF5F57','#FEBC2E','#28C840'].map(c => <div key={c} style={{ width:'8px', height:'8px', borderRadius:'50%', background:c }} />)}
                 </div>
+                <div style={{ flex:1, background:'rgba(0,0,0,.25)', borderRadius:'5px', padding:'3px 10px', fontSize:'11px', color:'rgba(255,255,255,.25)', textAlign:'center' }}>app.signcodepro.com/lookup</div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '72px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '16px' }}>Who it's for</div>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0D1B2A', lineHeight: '1.3' }}>Built for sign industry professionals</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-            {[
-              { role: 'Permit coordinators', desc: 'Stop hunting through municipal websites. Get a clearer starting point for every job.' },
-              { role: 'Project managers', desc: "See every permit job's status in one place. Know what's missing before it becomes a problem." },
-              { role: 'Experienced permit runners', desc: 'Move faster in unfamiliar jurisdictions. Surface the gotchas before they cost you weeks.' },
-              { role: 'Shop owners', desc: 'Less time on research means more time on billable work. Better submissions mean fewer delays.' },
-            ].map(({ role, desc }) => (
-              <div key={role} style={{ padding: '24px', background: '#F4F7FA', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#0D1B2A', marginBottom: '8px' }}>{role}</div>
-                <div style={{ fontSize: '13px', color: '#5A6B7A', lineHeight: '1.6' }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '72px 24px', background: '#F4F7FA' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '16px' }}>The value</div>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0D1B2A', lineHeight: '1.3' }}>Efficiency and reduction.<br />That's the whole formula.</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-            {[
-              { icon: '⚡', title: 'Faster research', desc: 'Get to likely requirements in seconds instead of hours.' },
-              { icon: '📋', title: 'Cleaner submissions', desc: "Know what's needed before you submit. Reduce rejections." },
-              { icon: '👥', title: 'Team visibility', desc: "Everyone sees every job's status. No more status-check calls." },
-              { icon: '🎯', title: 'Code-backed guidance', desc: 'Requirements sourced from official government publications.' },
-              { icon: '⚠️', title: 'Red flag alerts', desc: 'Surface the jurisdiction-specific gotchas before they surprise you.' },
-              { icon: '📞', title: 'Direct contact info', desc: 'Right department, right phone number, right portal. Every time.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} style={{ padding: '20px', background: '#fff', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '24px', marginBottom: '10px' }}>{icon}</div>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#0D1B2A', marginBottom: '6px' }}>{title}</div>
-                <div style={{ fontSize: '12px', color: '#5A6B7A', lineHeight: '1.5' }}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '32px 24px', background: '#fff', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: '12px', color: '#9BA8B4', lineHeight: '1.7' }}>
-            SignCode Pro provides general permit guidance based on publicly available sources to help sign professionals work more efficiently. Requirements vary by jurisdiction and change over time. Always verify requirements directly with the jurisdiction before submitting. SignCode Pro is not a legal authority and does not guarantee permit approval.
-          </p>
-        </div>
-      </section>
-
-      <section style={{ padding: '72px 24px', background: '#F4F7FA' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '16px' }}>Pricing</div>
-            <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#0D1B2A', marginBottom: '12px' }}>Simple, justifiable pricing</h2>
-            <p style={{ fontSize: '14px', color: '#5A6B7A' }}>One rejected submittal costs more than a year of SignCode Pro.</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-            {[
-              { name: 'Starter', price: '$79', period: '/mo', desc: 'Perfect for small shops and solo permit runners', features: ['Jurisdiction lookup', 'Document checklists', 'Up to 10 active jobs', 'Email support'], highlight: false },
-              { name: 'Professional', price: '$199', period: '/mo', desc: 'For growing teams handling multiple jobs at once', features: ['Everything in Starter', 'Unlimited active jobs', 'Team dashboard', 'Job status tracking', 'Red flag alerts', 'Priority support'], highlight: true },
-              { name: 'Enterprise', price: 'Custom', period: '', desc: 'For large operations and multi-location shops', features: ['Everything in Professional', 'Custom jurisdictions', 'API access', 'Dedicated support', 'Team training'], highlight: false },
-            ].map(({ name, price, period, desc, features, highlight }) => (
-              <div key={name} style={{ padding: '28px', background: highlight ? '#0D1B2A' : '#fff', borderRadius: '12px', border: highlight ? 'none' : '1px solid #E2E8F0', position: 'relative' }}>
-                {highlight && <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#185FA5', color: '#fff', fontSize: '11px', fontWeight: '600', padding: '3px 12px', borderRadius: '20px', whiteSpace: 'nowrap' }}>Most popular</div>}
-                <div style={{ fontSize: '14px', fontWeight: '600', color: highlight ? '#85B7EB' : '#5A6B7A', marginBottom: '8px' }}>{name}</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '32px', fontWeight: '700', color: highlight ? '#fff' : '#0D1B2A' }}>{price}</span>
-                  <span style={{ fontSize: '13px', color: highlight ? '#85B7EB' : '#9BA8B4' }}>{period}</span>
+              <div style={{ padding:'18px 20px' }}>
+                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'14px' }}>
+                  <div>
+                    <div style={{ fontSize:'15px', fontWeight:'700', color:'#fff', marginBottom:'3px' }}>Miami-Dade County, FL</div>
+                    <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>Ch. 33, Article VI · Last referenced Apr 2026</div>
+                  </div>
+                  <span style={{ fontSize:'10px', padding:'3px 9px', borderRadius:'20px', background:'rgba(16,185,129,.15)', color:'#6EE7B7', border:'1px solid rgba(16,185,129,.2)', fontWeight:'600', flexShrink:0, marginLeft:'8px' }}>✓ Verified</span>
                 </div>
-                <div style={{ fontSize: '12px', color: highlight ? '#85B7EB' : '#5A6B7A', marginBottom: '20px', lineHeight: '1.5' }}>{desc}</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-                  {features.map(f => (
-                    <div key={f} style={{ display: 'flex', gap: '8px', fontSize: '12px', color: highlight ? '#fff' : '#0D1B2A' }}>
-                      <span style={{ color: '#185FA5', fontWeight: '700' }}>✓</span>{f}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'7px', marginBottom:'14px' }}>
+                  {[
+                    { label:'Max monument ht.', val:'6 ft', color:'#60A5FA' },
+                    { label:'Engineer seal req.', val:'Over 24 sq ft', color:'#FCD34D' },
+                    { label:'EMC / digital', val:'Yes — restricted', color:'#6EE7B7' },
+                    { label:'Typical turnaround', val:'4–8 weeks', color:'#A5B4FC' },
+                  ].map(s => (
+                    <div key={s.label} style={{ background:'rgba(255,255,255,.05)', borderRadius:'8px', padding:'9px 11px', border:'1px solid rgba(255,255,255,.06)' }}>
+                      <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)', marginBottom:'3px' }}>{s.label}</div>
+                      <div style={{ fontSize:'13px', fontWeight:'700', color:s.color }}>{s.val}</div>
                     </div>
                   ))}
                 </div>
-                <a href="/waitlist" style={{ display: 'block', textAlign: 'center', padding: '10px', background: highlight ? '#185FA5' : '#F4F7FA', color: highlight ? '#fff' : '#0D1B2A', borderRadius: '8px', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Join waitlist</a>
+                <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'8px' }}>Required documents</div>
+                {[
+                  { text:'Notarized application (owner + qualifier)', done:true },
+                  { text:'Engineer-sealed calculations', done:true },
+                  { text:'ELEC.03 electrical permit', done:false },
+                  { text:'Certificate of Use', done:false },
+                ].map(d => (
+                  <div key={d.text} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'4px 0', fontSize:'11px', color:'rgba(255,255,255,.45)' }}>
+                    <div style={{ width:'14px', height:'14px', borderRadius:'50%', background:d.done ? '#10B981' : 'transparent', border:d.done ? 'none' : '1.5px solid rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      {d.done && <svg width="8" height="8" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round"/></svg>}
+                    </div>
+                    <span style={{ textDecoration:d.done ? 'line-through' : 'none', color:d.done ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,.5)' }}>{d.text}</span>
+                  </div>
+                ))}
+                <div style={{ marginTop:'12px', padding:'9px 12px', background:'rgba(245,158,11,.08)', border:'1px solid rgba(245,158,11,.18)', borderRadius:'8px', fontSize:'11px', color:'#FCD34D' }}>
+                  ⚠ If abutting a municipality — get their approval before submitting
+                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Float card bottom left */}
+            <div style={{ position:'absolute', bottom:'32px', left:'-24px', background:'rgba(99,102,241,.1)', border:'1px solid rgba(99,102,241,.22)', borderRadius:'12px', padding:'12px 16px', zIndex:10, animation:'float2 6s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
+              <div style={{ fontSize:'10px', color:'#A5B4FC', marginBottom:'8px', fontWeight:'500' }}>Active permit jobs</div>
+              {[
+                { name:'Broward Co.', pct:75, color:'#3B82F6' },
+                { name:'Miami-Dade', pct:100, color:'#10B981' },
+                { name:'Pompano Bch', pct:30, color:'#F59E0B' },
+              ].map(r => (
+                <div key={r.name} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'10px', color:'rgba(255,255,255,.4)', marginBottom:'5px' }}>
+                  <span style={{ minWidth:'72px' }}>{r.name}</span>
+                  <div style={{ flex:1, height:'4px', background:'rgba(255,255,255,.08)', borderRadius:'2px', minWidth:'60px' }}>
+                    <div style={{ height:'100%', width:`${r.pct}%`, background:r.color, borderRadius:'2px' }} />
+                  </div>
+                  <span>{r.pct === 100 ? '✓' : `${r.pct}%`}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#9BA8B4', marginTop: '24px' }}>Founding member pricing — 30% off Professional forever for early waitlist signups.</p>
         </div>
       </section>
 
-      <section style={{ padding: '80px 24px', background: '#0D1B2A' }}>
-        <div style={{ maxWidth: '560px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#fff', marginBottom: '16px', lineHeight: '1.3' }}>A better starting point for every permit job</h2>
-          <p style={{ fontSize: '15px', color: '#85B7EB', marginBottom: '36px', lineHeight: '1.7' }}>Join sign professionals already on the waitlist. Be first when we launch.</p>
+      {/* LOGO MARQUEE */}
+      <div style={{ borderTop:'1px solid rgba(255,255,255,.06)', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'28px 0', overflow:'hidden', marginTop:'60px' }}>
+        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', textAlign:'center', marginBottom:'18px', textTransform:'uppercase', letterSpacing:'.08em' }}>Used by sign professionals at</div>
+        <div style={{ overflow:'hidden', position:'relative' }}>
+          <div style={{ display:'flex', gap:'0', animation:'marquee 22s linear infinite', width:'max-content' }}>
+            {['FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now','FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now'].map((n,i) => (
+              <span key={i} style={{ padding:'6px 24px', borderRight:'1px solid rgba(255,255,255,.06)', fontSize:'12px', color:'rgba(255,255,255,.25)', fontWeight:'500', whiteSpace:'nowrap' }}>{n}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* PROBLEM */}
+      <section style={{ padding:'80px 48px', maxWidth:'1100px', margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:'52px' }}>
+          <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>The problem</div>
+          <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'14px', lineHeight:'1.2' }}>Sign permitting wastes too much<br />of your team's time</h2>
+          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.4)', lineHeight:'1.75', maxWidth:'540px', margin:'0 auto' }}>Higher-paid staff spend hours digging through municipal websites. Newer people struggle in unfamiliar jurisdictions. Rejected submittals add weeks. The information exists — it's just buried.</p>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
+          {[
+            { stat:'2–4 hrs', label:'Average research time per unfamiliar jurisdiction', color:'#60A5FA' },
+            { stat:'4–8 wks', label:'Added to a job from a single rejected submittal', color:'#FCD34D' },
+            { stat:'100%', label:'Of that time could be spent on billable work instead', color:'#6EE7B7' },
+          ].map(s => (
+            <div key={s.stat} style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'28px 24px', textAlign:'center' }}>
+              <div style={{ fontSize:'38px', fontWeight:'800', color:s.color, marginBottom:'10px', letterSpacing:'-.5px' }}>{s.stat}</div>
+              <div style={{ fontSize:'13px', color:'rgba(255,255,255,.4)', lineHeight:'1.6' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'52px' }}>
+            <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>How it works</div>
+            <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', lineHeight:'1.2' }}>From address to action in seconds</h2>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:'12px', maxWidth:'720px', margin:'0 auto' }}>
+            {[
+              { n:'01', title:'Enter the job address and sign details', desc:'Tell us where the sign is going, what type it is, and the basic dimensions.' },
+              { n:'02', title:'Get likely requirements instantly', desc:'SignCode Pro identifies the jurisdiction and surfaces likely permit requirements, common red flags, and required documents for that sign type.' },
+              { n:'03', title:"See what's missing before you submit", desc:'A checklist shows exactly what you need to gather. Check items off as you collect them. No more rejected submittals from missing documents.' },
+              { n:'04', title:'Track every job from research to approval', desc:'Every permit job lives in one place. Your whole team sees the status. Nothing falls through the cracks.' },
+            ].map(s => (
+              <div key={s.n} style={{ display:'flex', gap:'20px', background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px 24px', alignItems:'flex-start' }}>
+                <div style={{ fontSize:'12px', fontWeight:'700', color:'#3B82F6', minWidth:'28px', paddingTop:'2px' }}>{s.n}</div>
+                <div>
+                  <div style={{ fontSize:'15px', fontWeight:'600', color:'#fff', marginBottom:'6px' }}>{s.title}</div>
+                  <div style={{ fontSize:'13px', color:'rgba(255,255,255,.4)', lineHeight:'1.65' }}>{s.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section style={{ padding:'80px 48px', maxWidth:'1100px', margin:'0 auto' }}>
+        <div style={{ textAlign:'center', marginBottom:'52px' }}>
+          <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>The value</div>
+          <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', lineHeight:'1.2' }}>Efficiency and reduction.<br />That's the whole formula.</h2>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'14px' }}>
+          {[
+            { icon:'⚡', title:'Faster research', desc:'Get to likely requirements in seconds instead of hours.', c:'rgba(59,130,246,.15)' },
+            { icon:'📋', title:'Cleaner submissions', desc:"Know what's needed before you submit. Reduce rejections.", c:'rgba(16,185,129,.15)' },
+            { icon:'👥', title:'Team visibility', desc:"Everyone sees every job's status. No more status-check calls.", c:'rgba(99,102,241,.15)' },
+            { icon:'🎯', title:'Code-backed guidance', desc:'Requirements sourced from official government publications.', c:'rgba(245,158,11,.15)' },
+            { icon:'⚠️', title:'Red flag alerts', desc:'Surface jurisdiction gotchas before they cost you weeks.', c:'rgba(239,68,68,.15)' },
+            { icon:'📞', title:'Direct contact info', desc:'Right department, right number, right portal. Every time.', c:'rgba(20,184,166,.15)' },
+          ].map(f => (
+            <div key={f.title} className="feat-card" style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px' }}>
+              <div style={{ width:'40px', height:'40px', borderRadius:'10px', background:f.c, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'14px', fontSize:'18px' }}>{f.icon}</div>
+              <div style={{ fontSize:'14px', fontWeight:'700', color:'#fff', marginBottom:'7px' }}>{f.title}</div>
+              <div style={{ fontSize:'12px', color:'rgba(255,255,255,.38)', lineHeight:'1.6' }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'52px' }}>
+            <div style={{ fontSize:'12px', color:'#60A5FA', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'12px' }}>Pricing</div>
+            <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'12px' }}>Simple, justifiable pricing</h2>
+            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.35)' }}>One rejected submittal costs more than a year of SignCode Pro.</p>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
+            {[
+              { name:'Starter', price:'$79', period:'/mo', desc:'For small shops and solo permit runners', features:['Jurisdiction lookup','Document checklists','Up to 10 active jobs','Email support'], highlight:false },
+              { name:'Professional', price:'$199', period:'/mo', desc:'For growing teams handling multiple jobs', features:['Everything in Starter','Unlimited active jobs','Team dashboard','Job status tracking','Red flag alerts','Priority support'], highlight:true },
+              { name:'Enterprise', price:'Custom', period:'', desc:'For large operations and multi-location shops', features:['Everything in Professional','Custom jurisdictions','API access','Dedicated support','Team training'], highlight:false },
+            ].map(p => (
+              <div key={p.name} style={{ position:'relative', padding:'28px', background:p.highlight ? 'rgba(59,130,246,.1)' : 'rgba(255,255,255,.03)', borderRadius:'16px', border:p.highlight ? '1px solid rgba(59,130,246,.4)' : '1px solid rgba(255,255,255,.07)' }}>
+                {p.highlight && <div style={{ position:'absolute', top:'-12px', left:'50%', transform:'translateX(-50%)', background:'#3B82F6', color:'#fff', fontSize:'11px', fontWeight:'600', padding:'3px 14px', borderRadius:'20px', whiteSpace:'nowrap' }}>Most popular</div>}
+                <div style={{ fontSize:'13px', fontWeight:'600', color:p.highlight ? '#93C5FD' : 'rgba(255,255,255,.4)', marginBottom:'8px' }}>{p.name}</div>
+                <div style={{ display:'flex', alignItems:'baseline', gap:'3px', marginBottom:'8px' }}>
+                  <span style={{ fontSize:'34px', fontWeight:'800', color:'#fff' }}>{p.price}</span>
+                  <span style={{ fontSize:'13px', color:'rgba(255,255,255,.3)' }}>{p.period}</span>
+                </div>
+                <div style={{ fontSize:'12px', color:'rgba(255,255,255,.35)', marginBottom:'20px', lineHeight:'1.5' }}>{p.desc}</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'24px' }}>
+                  {p.features.map(f => (
+                    <div key={f} style={{ display:'flex', gap:'8px', fontSize:'12px', color:'rgba(255,255,255,.6)', alignItems:'center' }}>
+                      <span style={{ color:'#3B82F6', fontWeight:'700', fontSize:'14px' }}>✓</span>{f}
+                    </div>
+                  ))}
+                </div>
+                <a href="/waitlist" style={{ display:'block', textAlign:'center', padding:'11px', background:p.highlight ? '#3B82F6' : 'rgba(255,255,255,.07)', color:'#fff', borderRadius:'9px', fontSize:'13px', fontWeight:'600', textDecoration:'none' }}>Join waitlist</a>
+              </div>
+            ))}
+          </div>
+          <p style={{ textAlign:'center', fontSize:'12px', color:'rgba(255,255,255,.25)', marginTop:'24px' }}>Founding member pricing — 30% off Professional forever for early waitlist signups.</p>
+        </div>
+      </section>
+
+      {/* DISCLAIMER */}
+      <div style={{ padding:'24px 48px', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+        <p style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', lineHeight:'1.7', textAlign:'center', maxWidth:'720px', margin:'0 auto' }}>
+          SignCode Pro provides general permit guidance based on publicly available sources to help sign professionals work more efficiently. Requirements vary by jurisdiction and change over time. Always verify requirements directly with the jurisdiction before submitting. SignCode Pro is not a legal authority and does not guarantee permit approval.
+        </p>
+      </div>
+
+      {/* CTA */}
+      <section style={{ padding:'88px 48px', position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle,rgba(59,130,246,.15) 0%,transparent 65%)', top:'50%', left:'50%', transform:'translate(-50%,-50%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', inset:0, opacity:.03, backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize:'48px 48px', pointerEvents:'none' }} />
+        <div style={{ position:'relative', zIndex:2, maxWidth:'560px', margin:'0 auto', textAlign:'center' }}>
+          <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'16px', lineHeight:'1.2' }}>A better starting point<br />for every permit job</h2>
+          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.4)', marginBottom:'36px', lineHeight:'1.7' }}>Join sign professionals already on the waitlist. Be first when we launch.</p>
           {!submitted ? (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', maxWidth: '440px', margin: '0 auto' }}>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your work email" required style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', border: 'none', fontSize: '14px', outline: 'none' }} />
-              <button type="submit" disabled={loading} style={{ padding: '12px 22px', background: '#185FA5', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <form onSubmit={handleSubmit} style={{ display:'flex', gap:'10px', maxWidth:'440px', margin:'0 auto' }}>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your work email" required style={{ flex:1, padding:'13px 16px', borderRadius:'9px', border:'1px solid rgba(255,255,255,.12)', fontSize:'14px', outline:'none', background:'rgba(255,255,255,.07)', color:'#fff' }} />
+              <button type="submit" disabled={loading} style={{ padding:'13px 22px', background:'#3B82F6', color:'#fff', border:'none', borderRadius:'9px', fontSize:'14px', fontWeight:'600', cursor:'pointer', whiteSpace:'nowrap' }}>
                 {loading ? 'Joining...' : 'Join waitlist'}
               </button>
             </form>
           ) : (
-            <div style={{ background: 'rgba(24,95,165,0.2)', border: '1px solid #185FA5', borderRadius: '10px', padding: '20px', color: '#85B7EB', fontSize: '14px' }}>
+            <div style={{ background:'rgba(16,185,129,.1)', border:'1px solid rgba(16,185,129,.2)', borderRadius:'12px', padding:'20px', color:'#6EE7B7', fontSize:'14px' }}>
               You're on the list. We'll be in touch when we launch. 🙌
             </div>
           )}
-          <p style={{ fontSize: '11px', color: '#5A6B7A', marginTop: '16px' }}>No spam. No pressure. Just a heads up when we're ready.</p>
+          <p style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', marginTop:'16px' }}>No spam. No pressure. Just a heads up when we're ready.</p>
         </div>
       </section>
 
-      <footer style={{ background: '#0A1420', padding: '32px 24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <svg width="22" height="22" viewBox="0 0 80 80"><rect width="80" height="80" rx="16" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M49.5 60l4 4 8-9" stroke="#185FA5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: '#fff' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
-          </div>
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <a href="/lookup" style={{ fontSize: '12px', color: '#5A6B7A', textDecoration: 'none' }}>Lookup tool</a>
-            <a href="/waitlist" style={{ fontSize: '12px', color: '#5A6B7A', textDecoration: 'none' }}>Waitlist</a>
-          </div>
-          <div style={{ fontSize: '11px', color: '#5A6B7A' }}>© 2026 SignCode Pro. All rights reserved.</div>
+      {/* FOOTER */}
+      <footer style={{ background:'rgba(0,0,0,.3)', padding:'28px 48px', borderTop:'1px solid rgba(255,255,255,.05)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'16px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+          <svg width="22" height="22" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#3B82F6"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+          <span style={{ fontSize:'13px', fontWeight:'700', color:'#fff' }}>Sign<span style={{ color:'#60A5FA' }}>Code</span> Pro</span>
         </div>
+        <div style={{ display:'flex', gap:'20px' }}>
+          {[['Lookup tool','/lookup'],['Job tracker','/jobs'],['Waitlist','/waitlist']].map(([l,h]) => (
+            <a key={l} href={h} style={{ fontSize:'12px', color:'rgba(255,255,255,.25)', textDecoration:'none' }}>{l}</a>
+          ))}
+        </div>
+        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.2)' }}>© 2026 SignCode Pro. All rights reserved.</div>
       </footer>
     </main>
   );

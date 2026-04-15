@@ -22,7 +22,7 @@ export default function Home() {
   }
 
   return (
-    <main style={{ fontFamily: "'Segoe UI', Arial, sans-serif", background: '#080F1E', minHeight: '100vh', overflowX: 'hidden' }}>
+    <main style={{ fontFamily: "'Segoe UI', Arial, sans-serif", background: '#0D1B2A', minHeight: '100vh', overflowX: 'hidden' }}>
       <style>{`
         @keyframes pulse { 0%,100%{opacity:.18} 50%{opacity:.3} }
         @keyframes float1 { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-14px)} }
@@ -36,14 +36,14 @@ export default function Home() {
       `}</style>
 
       {/* NAV */}
-      <nav style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 48px', borderBottom:'1px solid rgba(255,255,255,.06)', position:'sticky', top:0, zIndex:100, background:'rgba(8,15,30,.92)', backdropFilter:'blur(14px)' }}>
+      <nav style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 48px', borderBottom:'1px solid rgba(255,255,255,.06)', position:'sticky', top:0, zIndex:100, background:'rgba(13,27,42,.95)', backdropFilter:'blur(14px)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'9px' }}>
           <svg width="28" height="28" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#3B82F6"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
           <span style={{ fontSize:'15px', fontWeight:'700', color:'#fff', letterSpacing:'-.3px' }}>Sign<span style={{ color:'#60A5FA' }}>Code</span> Pro</span>
         </div>
         <div style={{ display:'flex', gap:'28px' }}>
           {['Product','Jurisdictions','Pricing'].map(l => (
-            <a key={l} className="nav-link" href="#" style={{ fontSize:'13px', color:'rgba(255,255,255,.45)', textDecoration:'none', transition:'color .15s' }}>{l}</a>
+            <a key={l} className="nav-link" href="#" style={{ fontSize:'13px', color:'rgba(255,255,255,.72)', textDecoration:'none', transition:'color .15s' }}>{l}</a>
           ))}
         </div>
         <a href="/waitlist" style={{ padding:'9px 22px', background:'#3B82F6', color:'#fff', borderRadius:'9px', fontSize:'13px', fontWeight:'600', textDecoration:'none' }}>Join waitlist</a>
@@ -69,20 +69,20 @@ export default function Home() {
               Enter the address.<br />
               <span style={{ background:'linear-gradient(135deg,#60A5FA 0%,#818CF8 100%)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>Cut permit research time.</span>
             </h1>
-            <p style={{ fontSize:'16px', color:'rgba(255,255,255,.5)', lineHeight:'1.75', marginBottom:'34px', maxWidth:'440px' }}>
+            <p style={{ fontSize:'16px', color:'rgba(255,255,255,.75)', lineHeight:'1.75', marginBottom:'34px', maxWidth:'440px' }}>
               SignCode Pro helps identify likely requirements, missing items, and code-backed next steps so your team can prepare cleaner submissions faster.
             </p>
             <div style={{ display:'flex', gap:'12px', marginBottom:'36px' }}>
               <a href="/waitlist" style={{ padding:'13px 26px', background:'#3B82F6', color:'#fff', borderRadius:'10px', fontSize:'14px', fontWeight:'600', textDecoration:'none', display:'inline-block' }}>Join the waitlist</a>
-              <a href="/lookup" style={{ padding:'13px 26px', background:'rgba(255,255,255,.06)', color:'#fff', border:'1px solid rgba(255,255,255,.12)', borderRadius:'10px', fontSize:'14px', fontWeight:'500', textDecoration:'none', display:'inline-block' }}>Try the lookup tool →</a>
+              <a href="/lookup" style={{ padding:'13px 26px', background:'rgba(255,255,255,.1)', color:'#fff', border:'1px solid rgba(255,255,255,.12)', borderRadius:'10px', fontSize:'14px', fontWeight:'500', textDecoration:'none', display:'inline-block' }}>Try the lookup tool →</a>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
               <div style={{ display:'flex' }}>
                 {['JS','MR','AL','TK','PW'].map((i,n) => (
-                  <div key={i} style={{ width:'28px', height:'28px', borderRadius:'50%', border:'2px solid #080F1E', background:['#1E3A5F','#1A3352','#1D2F4A','#162840','#1B3358'][n], display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', color:'#93C5FD', fontWeight:'700', marginLeft: n===0 ? 0 : '-7px', zIndex:5-n, position:'relative' }}>{i}</div>
+                  <div key={i} style={{ width:'28px', height:'28px', borderRadius:'50%', border:'2px solid #0D1B2A', background:['#1E3A5F','#1A3352','#1D2F4A','#162840','#1B3358'][n], display:'flex', alignItems:'center', justifyContent:'center', fontSize:'9px', color:'#93C5FD', fontWeight:'700', marginLeft: n===0 ? 0 : '-7px', zIndex:5-n, position:'relative' }}>{i}</div>
                 ))}
               </div>
-              <span style={{ fontSize:'12px', color:'rgba(255,255,255,.4)' }}><strong style={{ color:'rgba(255,255,255,.65)' }}>Sign professionals</strong> already on the waitlist</span>
+              <span style={{ fontSize:'12px', color:'rgba(255,255,255,.72)' }}><strong style={{ color:'rgba(255,255,255,.65)' }}>Sign professionals</strong> already on the waitlist</span>
             </div>
           </div>
 
@@ -92,22 +92,22 @@ export default function Home() {
             <div style={{ position:'absolute', top:'-20px', right:'-12px', background:'rgba(16,185,129,.15)', border:'1px solid rgba(16,185,129,.3)', borderRadius:'12px', padding:'11px 15px', zIndex:10, animation:'float1 5s ease-in-out infinite', backdropFilter:'blur(8px)' }}>
               <div style={{ fontSize:'10px', color:'#6EE7B7', fontWeight:'600', marginBottom:'2px' }}>Avg. research time saved</div>
               <div style={{ fontSize:'20px', fontWeight:'800', color:'#fff' }}>3.2 hrs</div>
-              <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>per jurisdiction lookup</div>
+              <div style={{ fontSize:'10px', color:'rgba(255,255,255,.78)' }}>per jurisdiction lookup</div>
             </div>
 
             {/* Main UI card */}
-            <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.1)', borderRadius:'16px', overflow:'hidden' }}>
-              <div style={{ background:'rgba(255,255,255,.05)', padding:'11px 16px', display:'flex', alignItems:'center', gap:'8px', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
+            <div style={{ background:'rgba(255,255,255,.11)', border:'1px solid rgba(255,255,255,.1)', borderRadius:'16px', overflow:'hidden' }}>
+              <div style={{ background:'rgba(255,255,255,.09)', padding:'11px 16px', display:'flex', alignItems:'center', gap:'8px', borderBottom:'1px solid rgba(255,255,255,.06)' }}>
                 <div style={{ display:'flex', gap:'5px' }}>
                   {['#FF5F57','#FEBC2E','#28C840'].map(c => <div key={c} style={{ width:'8px', height:'8px', borderRadius:'50%', background:c }} />)}
                 </div>
-                <div style={{ flex:1, background:'rgba(0,0,0,.25)', borderRadius:'5px', padding:'3px 10px', fontSize:'11px', color:'rgba(255,255,255,.25)', textAlign:'center' }}>app.signcodepro.com/lookup</div>
+                <div style={{ flex:1, background:'rgba(0,0,0,.25)', borderRadius:'5px', padding:'3px 10px', fontSize:'11px', color:'rgba(255,255,255,.75)', textAlign:'center' }}>app.signcodepro.com/lookup</div>
               </div>
               <div style={{ padding:'18px 20px' }}>
                 <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'14px' }}>
                   <div>
                     <div style={{ fontSize:'15px', fontWeight:'700', color:'#fff', marginBottom:'3px' }}>Miami-Dade County, FL</div>
-                    <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)' }}>Ch. 33, Article VI · Last referenced Apr 2026</div>
+                    <div style={{ fontSize:'10px', color:'rgba(255,255,255,.78)' }}>Ch. 33, Article VI · Last referenced Apr 2026</div>
                   </div>
                   <span style={{ fontSize:'10px', padding:'3px 10px', borderRadius:'20px', background:'#fff', color:'#0D1B2A', fontWeight:'700', flexShrink:0, marginLeft:'8px' }}>✓ Verified</span>
                 </div>
@@ -118,20 +118,20 @@ export default function Home() {
                     { label:'EMC / digital', val:'Yes — restricted', color:'#6EE7B7' },
                     { label:'Typical turnaround', val:'4–8 weeks', color:'#A5B4FC' },
                   ].map(s => (
-                    <div key={s.label} style={{ background:'rgba(255,255,255,.05)', borderRadius:'8px', padding:'9px 11px', border:'1px solid rgba(255,255,255,.06)' }}>
-                      <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)', marginBottom:'3px' }}>{s.label}</div>
+                    <div key={s.label} style={{ background:'rgba(255,255,255,.09)', borderRadius:'8px', padding:'9px 11px', border:'1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize:'10px', color:'rgba(255,255,255,.78)', marginBottom:'3px' }}>{s.label}</div>
                       <div style={{ fontSize:'13px', fontWeight:'700', color:s.color }}>{s.val}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize:'10px', color:'rgba(255,255,255,.3)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'8px' }}>Required documents</div>
+                <div style={{ fontSize:'10px', color:'rgba(255,255,255,.78)', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'8px' }}>Required documents</div>
                 {[
                   { text:'Notarized application (owner + qualifier)', done:true },
                   { text:'Engineer-sealed calculations', done:true },
                   { text:'ELEC.03 electrical permit', done:false },
                   { text:'Certificate of Use', done:false },
                 ].map(d => (
-                  <div key={d.text} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'4px 0', fontSize:'11px', color:'rgba(255,255,255,.45)' }}>
+                  <div key={d.text} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'4px 0', fontSize:'11px', color:'rgba(255,255,255,.72)' }}>
                     <div style={{ width:'14px', height:'14px', borderRadius:'50%', background:d.done ? '#10B981' : 'transparent', border:d.done ? 'none' : '1.5px solid rgba(255,255,255,.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                       {d.done && <svg width="8" height="8" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round"/></svg>}
                     </div>
@@ -153,7 +153,7 @@ export default function Home() {
                   { name:'Miami-Dade', pct:100, color:'#10B981' },
                   { name:'Pompano Bch', pct:30, color:'#F59E0B' },
                 ].map(r => (
-                  <div key={r.name} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'10px', color:'rgba(255,255,255,.5)', marginBottom:'5px' }}>
+                  <div key={r.name} style={{ display:'flex', alignItems:'center', gap:'8px', fontSize:'10px', color:'rgba(255,255,255,.75)', marginBottom:'5px' }}>
                     <span style={{ minWidth:'72px' }}>{r.name}</span>
                     <div style={{ flex:1, height:'4px', background:'rgba(255,255,255,.08)', borderRadius:'2px', minWidth:'80px' }}>
                       <div style={{ height:'100%', width:`${r.pct}%`, background:r.color, borderRadius:'2px' }} />
@@ -169,11 +169,11 @@ export default function Home() {
 
       {/* LOGO MARQUEE */}
       <div style={{ borderTop:'1px solid rgba(255,255,255,.06)', borderBottom:'1px solid rgba(255,255,255,.06)', padding:'28px 0', overflow:'hidden', marginTop:'60px' }}>
-        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.35)', textAlign:'center', marginBottom:'18px', textTransform:'uppercase', letterSpacing:'.08em' }}>Used by sign professionals at</div>
+        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.65)', textAlign:'center', marginBottom:'18px', textTransform:'uppercase', letterSpacing:'.08em' }}>Used by sign professionals at</div>
         <div style={{ overflow:'hidden', position:'relative' }}>
           <div style={{ display:'flex', gap:'0', animation:'marquee 22s linear infinite', width:'max-content' }}>
             {['FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now','FASTSIGNS','Signarama','Signs By Tomorrow','SpeedPro','Big Visual Group','Sign Shops Nationwide','AlphaGraphics','Signs Now'].map((n,i) => (
-              <span key={i} style={{ padding:'6px 24px', borderRight:'1px solid rgba(255,255,255,.08)', fontSize:'12px', color:'rgba(255,255,255,.4)', fontWeight:'600', whiteSpace:'nowrap' }}>{n}</span>
+              <span key={i} style={{ padding:'6px 24px', borderRight:'1px solid rgba(255,255,255,.08)', fontSize:'12px', color:'rgba(255,255,255,.72)', fontWeight:'600', whiteSpace:'nowrap' }}>{n}</span>
             ))}
           </div>
         </div>
@@ -184,7 +184,7 @@ export default function Home() {
         <div style={{ textAlign:'center', marginBottom:'52px' }}>
           <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>The problem</div>
           <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'14px', lineHeight:'1.2' }}>Sign permitting wastes too much<br />of your team's time</h2>
-          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.55)', lineHeight:'1.75', maxWidth:'540px', margin:'0 auto' }}>Higher-paid staff spend hours digging through municipal websites. Newer people struggle in unfamiliar jurisdictions. Rejected submittals add weeks. The information exists — it's just buried.</p>
+          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.78)', lineHeight:'1.75', maxWidth:'540px', margin:'0 auto' }}>Higher-paid staff spend hours digging through municipal websites. Newer people struggle in unfamiliar jurisdictions. Rejected submittals add weeks. The information exists — it's just buried.</p>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
           {[
@@ -192,7 +192,7 @@ export default function Home() {
             { stat:'4–8 wks', label:'Added to a job from a single rejected submittal', color:'#FCD34D' },
             { stat:'100%', label:'Of that time could be spent on billable work instead', color:'#6EE7B7' },
           ].map(s => (
-            <div key={s.stat} style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'28px 24px', textAlign:'center' }}>
+            <div key={s.stat} style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.12)', borderRadius:'14px', padding:'28px 24px', textAlign:'center' }}>
               <div style={{ fontSize:'38px', fontWeight:'800', color:s.color, marginBottom:'10px', letterSpacing:'-.5px' }}>{s.stat}</div>
               <div style={{ fontSize:'13px', color:'rgba(255,255,255,.6)', lineHeight:'1.6' }}>{s.label}</div>
             </div>
@@ -201,7 +201,7 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.11)', borderTop:'1px solid rgba(255,255,255,.09)', borderBottom:'1px solid rgba(255,255,255,.09)' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'52px' }}>
             <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>How it works</div>
@@ -214,11 +214,11 @@ export default function Home() {
               { n:'03', title:"See what's missing before you submit", desc:'A checklist shows exactly what you need to gather. Check items off as you collect them. No more rejected submittals from missing documents.' },
               { n:'04', title:'Track every job from research to approval', desc:'Every permit job lives in one place. Your whole team sees the status. Nothing falls through the cracks.' },
             ].map(s => (
-              <div key={s.n} style={{ display:'flex', gap:'20px', background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px 24px', alignItems:'flex-start' }}>
+              <div key={s.n} style={{ display:'flex', gap:'20px', background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.12)', borderRadius:'14px', padding:'22px 24px', alignItems:'flex-start' }}>
                 <div style={{ fontSize:'11px', fontWeight:'700', color:'#0D1B2A', minWidth:'32px', height:'24px', background:'#fff', borderRadius:'20px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:'1px' }}>{s.n}</div>
                 <div>
                   <div style={{ fontSize:'15px', fontWeight:'600', color:'#fff', marginBottom:'6px' }}>{s.title}</div>
-                  <div style={{ fontSize:'13px', color:'rgba(255,255,255,.55)', lineHeight:'1.65' }}>{s.desc}</div>
+                  <div style={{ fontSize:'13px', color:'rgba(255,255,255,.78)', lineHeight:'1.65' }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -241,22 +241,22 @@ export default function Home() {
             { icon:'⚠️', title:'Red flag alerts', desc:'Surface jurisdiction gotchas before they cost you weeks.', c:'rgba(239,68,68,.15)' },
             { icon:'📞', title:'Direct contact info', desc:'Right department, right number, right portal. Every time.', c:'rgba(20,184,166,.15)' },
           ].map(f => (
-            <div key={f.title} className="feat-card" style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.07)', borderRadius:'14px', padding:'22px' }}>
+            <div key={f.title} className="feat-card" style={{ background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.12)', borderRadius:'14px', padding:'22px' }}>
               <div style={{ width:'44px', height:'44px', borderRadius:'12px', background:'#fff', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'14px', fontSize:'20px' }}>{f.icon}</div>
               <div style={{ fontSize:'14px', fontWeight:'700', color:'#fff', marginBottom:'7px' }}>{f.title}</div>
-              <div style={{ fontSize:'12px', color:'rgba(255,255,255,.5)', lineHeight:'1.6' }}>{f.desc}</div>
+              <div style={{ fontSize:'12px', color:'rgba(255,255,255,.75)', lineHeight:'1.6' }}>{f.desc}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* PRICING */}
-      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+      <section style={{ padding:'80px 48px', background:'rgba(255,255,255,.11)', borderTop:'1px solid rgba(255,255,255,.09)', borderBottom:'1px solid rgba(255,255,255,.09)' }}>
         <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'52px' }}>
             <div style={{ fontSize:'11px', color:'#0D1B2A', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:'16px', display:'inline-block', background:'#ffffff', padding:'5px 16px', borderRadius:'20px' }}>Pricing</div>
             <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'12px' }}>Simple, justifiable pricing</h2>
-            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.35)' }}>One rejected submittal costs more than a year of SignCode Pro.</p>
+            <p style={{ fontSize:'14px', color:'rgba(255,255,255,.65)' }}>One rejected submittal costs more than a year of SignCode Pro.</p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'16px' }}>
             {[
@@ -269,9 +269,9 @@ export default function Home() {
                 <div style={{ fontSize:'11px', fontWeight:'700', color:'#0D1B2A', marginBottom:'12px', display:'inline-block', background:'#fff', padding:'4px 12px', borderRadius:'20px' }}>{p.name}</div>
                 <div style={{ display:'flex', alignItems:'baseline', gap:'3px', marginBottom:'8px' }}>
                   <span style={{ fontSize:'34px', fontWeight:'800', color:'#fff' }}>{p.price}</span>
-                  <span style={{ fontSize:'13px', color:'rgba(255,255,255,.3)' }}>{p.period}</span>
+                  <span style={{ fontSize:'13px', color:'rgba(255,255,255,.78)' }}>{p.period}</span>
                 </div>
-                <div style={{ fontSize:'12px', color:'rgba(255,255,255,.35)', marginBottom:'20px', lineHeight:'1.5' }}>{p.desc}</div>
+                <div style={{ fontSize:'12px', color:'rgba(255,255,255,.65)', marginBottom:'20px', lineHeight:'1.5' }}>{p.desc}</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'24px' }}>
                   {p.features.map(f => (
                     <div key={f} style={{ display:'flex', gap:'8px', fontSize:'12px', color:'rgba(255,255,255,.6)', alignItems:'center' }}>
@@ -283,13 +283,13 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <p style={{ textAlign:'center', fontSize:'12px', color:'rgba(255,255,255,.25)', marginTop:'24px' }}>Founding member pricing — 30% off Professional forever for early waitlist signups.</p>
+          <p style={{ textAlign:'center', fontSize:'12px', color:'rgba(255,255,255,.75)', marginTop:'24px' }}>Founding member pricing — 30% off Professional forever for early waitlist signups.</p>
         </div>
       </section>
 
       {/* DISCLAIMER */}
-      <div style={{ padding:'24px 48px', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)' }}>
-        <p style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', lineHeight:'1.7', textAlign:'center', maxWidth:'720px', margin:'0 auto' }}>
+      <div style={{ padding:'24px 48px', borderTop:'1px solid rgba(255,255,255,.09)', borderBottom:'1px solid rgba(255,255,255,.09)' }}>
+        <p style={{ fontSize:'11px', color:'rgba(255,255,255,.45)', lineHeight:'1.7', textAlign:'center', maxWidth:'720px', margin:'0 auto' }}>
           SignCode Pro provides general permit guidance based on publicly available sources to help sign professionals work more efficiently. Requirements vary by jurisdiction and change over time. Always verify requirements directly with the jurisdiction before submitting. SignCode Pro is not a legal authority and does not guarantee permit approval.
         </p>
       </div>
@@ -300,10 +300,10 @@ export default function Home() {
         <div style={{ position:'absolute', inset:0, opacity:.03, backgroundImage:'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize:'48px 48px', pointerEvents:'none' }} />
         <div style={{ position:'relative', zIndex:2, maxWidth:'560px', margin:'0 auto', textAlign:'center' }}>
           <h2 style={{ fontSize:'36px', fontWeight:'800', color:'#fff', letterSpacing:'-.5px', marginBottom:'16px', lineHeight:'1.2' }}>A better starting point<br />for every permit job</h2>
-          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.4)', marginBottom:'36px', lineHeight:'1.7' }}>Join sign professionals already on the waitlist. Be first when we launch.</p>
+          <p style={{ fontSize:'15px', color:'rgba(255,255,255,.72)', marginBottom:'36px', lineHeight:'1.7' }}>Join sign professionals already on the waitlist. Be first when we launch.</p>
           {!submitted ? (
             <form onSubmit={handleSubmit} style={{ display:'flex', gap:'10px', maxWidth:'440px', margin:'0 auto' }}>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your work email" required style={{ flex:1, padding:'13px 16px', borderRadius:'9px', border:'1px solid rgba(255,255,255,.12)', fontSize:'14px', outline:'none', background:'rgba(255,255,255,.07)', color:'#fff' }} />
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your work email" required style={{ flex:1, padding:'13px 16px', borderRadius:'9px', border:'1px solid rgba(255,255,255,.12)', fontSize:'14px', outline:'none', background:'rgba(255,255,255,.11)', color:'#fff' }} />
               <button type="submit" disabled={loading} style={{ padding:'13px 22px', background:'#3B82F6', color:'#fff', border:'none', borderRadius:'9px', fontSize:'14px', fontWeight:'600', cursor:'pointer', whiteSpace:'nowrap' }}>
                 {loading ? 'Joining...' : 'Join waitlist'}
               </button>
@@ -313,22 +313,22 @@ export default function Home() {
               You're on the list. We'll be in touch when we launch. 🙌
             </div>
           )}
-          <p style={{ fontSize:'11px', color:'rgba(255,255,255,.2)', marginTop:'16px' }}>No spam. No pressure. Just a heads up when we're ready.</p>
+          <p style={{ fontSize:'11px', color:'rgba(255,255,255,.45)', marginTop:'16px' }}>No spam. No pressure. Just a heads up when we're ready.</p>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ background:'rgba(0,0,0,.3)', padding:'28px 48px', borderTop:'1px solid rgba(255,255,255,.05)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'16px' }}>
+      <footer style={{ background:'rgba(0,0,0,.3)', padding:'28px 48px', borderTop:'1px solid rgba(255,255,255,.09)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'16px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
           <svg width="22" height="22" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#3B82F6"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".2"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
           <span style={{ fontSize:'13px', fontWeight:'700', color:'#fff' }}>Sign<span style={{ color:'#60A5FA' }}>Code</span> Pro</span>
         </div>
         <div style={{ display:'flex', gap:'20px' }}>
           {[['Lookup tool','/lookup'],['Job tracker','/jobs'],['Waitlist','/waitlist']].map(([l,h]) => (
-            <a key={l} href={h} style={{ fontSize:'12px', color:'rgba(255,255,255,.4)', textDecoration:'none' }}>{l}</a>
+            <a key={l} href={h} style={{ fontSize:'12px', color:'rgba(255,255,255,.72)', textDecoration:'none' }}>{l}</a>
           ))}
         </div>
-        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.2)' }}>© 2026 SignCode Pro. All rights reserved.</div>
+        <div style={{ fontSize:'11px', color:'rgba(255,255,255,.45)' }}>© 2026 SignCode Pro. All rights reserved.</div>
       </footer>
     </main>
   );

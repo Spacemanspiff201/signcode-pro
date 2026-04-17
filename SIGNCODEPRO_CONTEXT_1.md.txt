@@ -1,0 +1,198 @@
+# SignCode Pro — Project Context
+> Drop this file into any new Claude conversation to restore full context.
+
+---
+
+## Who I Am
+**Joe Scara** — 20-year commercial sign installer. Just left my previous company to join a new one. I am NOT a permit coordinator — I'm an installer who has lived the pain of showing up to jobs where permits weren't right. I'm building SignCode Pro to solve a real problem I've seen firsthand.
+
+**Local project path:** `C:\Users\Joe\signcode-pro`
+
+---
+
+## What SignCode Pro Is
+A **sign permit research and job tracking platform** built specifically for Florida sign companies.
+
+**Core value prop:** You type in an address or city, it identifies the jurisdiction, and instantly surfaces:
+- Sign code requirements (max heights, setbacks, sq ft limits, EMC/digital rules)
+- Required documents (exact checklist for that sign type + jurisdiction)
+- Red flag alerts (Master Sign Programs, overlay districts, engineer seals, adjacent municipality approvals)
+- Direct contact info (right department, right number, right portal)
+- Fees and turnaround times
+- Practitioner notes (real-world gotchas from the field)
+
+**The pain it solves:** Sign permit coordinators waste 2–4 hours per unfamiliar jurisdiction digging through municipal websites. Rejected submittals add weeks to jobs. Installers show up and can't work because the permit wasn't right.
+
+---
+
+## Tech Stack
+- **Framework:** Next.js (App Router) — TypeScript
+- **Deployed:** Vercel → auto-deploys from GitHub on push
+- **Database:** Supabase (waitlist signups — live and working)
+- **Email:** Resend (confirmation emails with referral links — live and working)
+- **AI:** Anthropic API (claude-sonnet-4-6) — used in the lookup API route to format jurisdiction data
+- **Repo:** https://github.com/Spacemanspiff201/signcode-pro (public)
+- **Live site:** https://www.signcodepro.com
+
+---
+
+## Project Structure
+```
+C:\Users\Joe\signcode-pro\
+  app/
+    page.tsx              <- Marketing landing page (light theme, #185FA5 blue, premium redesign DONE)
+    layout.tsx            <- Root layout (NOTE: title still says "Create Next App" — needs fixing)
+    globals.css
+    page.module.css
+    lookup/
+      page.tsx            <- Lookup tool UI — 18 jurisdictions shown
+    jobs/
+      page.tsx            <- Job tracker (permit jobs, document checklists, status tracking)
+    waitlist/
+      page.tsx            <- Waitlist signup form
+    api/
+      lookup/
+        route.ts          <- THE CORE: all 18 jurisdiction data sets + Anthropic API call
+      waitlist/
+        route.ts          <- Supabase insert + Resend confirmation email + referral system
+  public/
+  AGENTS.md
+  CLAUDE.md
+  SIGNCODEPRO_CONTEXT.md  <- This file — keep in project root
+```
+
+---
+
+## The Lookup System
+
+### How it works:
+1. User types a city (e.g. "Hollywood")
+2. CITY_MAP in lookup/page.tsx maps it to a jurisdiction key (e.g. "hollywood")
+3. Calls /api/lookup?jurisdiction=hollywood
+4. API route has hardcoded verified data for each jurisdiction
+5. Sends that data to Claude (claude-sonnet-4-6) to format cleanly
+6. Falls back to raw data if AI call fails
+7. fetchSource() tries to pull from official government URLs for supplemental context
+
+### 18 jurisdictions currently covered:
+
+**Original 10:**
+- miami-dade — Miami-Dade County (engineer seal over 24 sq ft, adjacent municipality approval, shop inspection)
+- broward — Broward County (unincorporated only)
+- palm-beach — Palm Beach County (tiered system by road classification)
+- fort-lauderdale — City of Fort Lauderdale (contractor registration required, interior signs need engineer seal)
+- pompano-beach — City of Pompano Beach (Master Sign Program mandatory since 2022, AAC review for Atlantic Blvd)
+- boca-raton — City of Boca Raton (strictest in South FL, EMC banned, design review, 8-12 week turnaround)
+- miami-beach — City of Miami Beach (no EMC/digital, historic districts, channel letters only)
+- orlando — City of Orlando (Downtown CRA requires Appearance Review Board)
+- tampa — City of Tampa (historic districts need ARC Certificate of Appropriateness)
+- hillsborough — Hillsborough County (always verify unincorporated vs Tampa city limits)
+
+**New 8 — Southeast Florida (built, ready to deploy):**
+- hollywood — City of Hollywood (Broward County Uniform Permit App, ePermitsOneStop, sign tag required)
+- deerfield-beach — City of Deerfield Beach (owner signature required on ALL permits)
+- pembroke-pines — City of Pembroke Pines (CGA Solutions manages building dept)
+- coral-springs — City of Coral Springs (strict aesthetic standards, active code enforcement)
+- miramar — City of Miramar (large business park district along Miramar Parkway)
+- west-palm-beach — City of West Palm Beach (Downtown CRA, historic districts, NOT Palm Beach County)
+- delray-beach — City of Delray Beach (separate permit per sign, qualifier must notarize, fully digital ePlans, triple fees for unpermitted)
+- sunrise — City of Sunrise (Sawgrass Mills master sign program applies in mall area)
+
+---
+
+## Files Ready to Deploy (from last session)
+These were built and need to be copied to the project:
+- route.ts → app/api/lookup/route.ts (replace existing — has all 18 jurisdictions)
+- lookup-page.tsx → app/lookup/page.tsx (rename to page.tsx — updated city map + 18 jurisdictions shown)
+
+---
+
+## Waitlist System
+- Supabase table: waitlist — firstName, lastName, email, company, role, permit_volume, primary_markets, referred_by, position (auto), referral_code (auto)
+- Waitlist IS live and functional — real signups save to Supabase and trigger Resend email
+- The "66 sign companies" shown in UI is hardcoded demo text
+- Referral system: each referral moves you up 5 spots
+- 100 Florida beta spots (34 remaining — hardcoded demo)
+
+---
+
+## Job Tracker (/jobs)
+- Status: Not Started → In Progress → Submitted → Under Review → Approved → Rejected
+- Document checklists (checkable, addable), notes, assigned to, target date
+- Sample jobs: Publix #2241, AutoNation, Chick-fil-A, Walgreens, Chase Bank
+- Data in localStorage — not Supabase yet (demo only)
+
+---
+
+## Current Status
+Live demo at signcodepro.com — showing to sign companies to validate interest.
+
+**Working:**
+- Live site, all UI pages
+- Lookup tool with 18 jurisdictions of real researched data
+- Anthropic API integration in lookup route
+- Waitlist saves to Supabase + sends Resend confirmation email
+
+**Not built yet:**
+- Real user accounts/auth
+- Supabase for jobs tracker
+- Live scraping pipeline
+- Payment/subscription system
+- Verbatim code language in lookup results (next big feature)
+
+---
+
+## Design
+- Theme: Light/white — #FAFBFD background, #0D1B2A dark navy, #185FA5 blue accent
+- Font: DM Sans (Google Fonts) — added in premium redesign
+- Logo: 4-square grid icon with blue fill and checkmark in bottom-right square
+- Animated hero background: rotating circles, floating shapes, dot grids — Joe likes these, keeping them
+- Style: Premium SaaS — scroll fade-ins, hover card lifts, blue glow on buttons, staggered hero animations
+- Premium landing page redesign: DONE and deployed
+
+---
+
+## Next Feature: Verbatim Code Language
+Joe wants to add actual ordinance text to each jurisdiction's lookup result.
+- Each jurisdiction gets a codeLanguage array: { section, title, text }
+- Displayed in a collapsible "Official code language" section on lookup result
+- Section numbers shown inline on size limits (e.g. "6 ft (§33-284.2)")
+- NO links to Municode or external sites — code text lives inside SignCode Pro
+- Makes the product authoritative and keeps users on the site
+
+---
+
+## Next Steps Priority Order
+- [ ] Deploy the 8 new jurisdiction files (route.ts + lookup page.tsx)
+- [ ] Fix page title in layout.tsx — still says "Create Next App"
+- [ ] Add verbatim code language to each jurisdiction in route.ts
+- [ ] Add Tier 1 jurisdictions: Jacksonville, St. Petersburg, Sarasota, Cape Coral/Lee County, Port St. Lucie
+- [ ] Mobile responsiveness polish
+- [ ] SEO / OG tags for social sharing
+- [ ] Connect jobs tracker to Supabase
+- [ ] Build real auth/accounts
+
+---
+
+## Key Commands
+```
+cd C:\Users\Joe\signcode-pro
+git add .
+git commit -m "your message here"
+git push
+```
+Vercel auto-deploys in ~60 seconds after push.
+
+---
+
+## Municode Note
+Joe's stance: Not worried about Municode ToS — SignCode Pro is too niche to be on their radar. Focus is sign industry only. Government codes are public record. Verbatim code text will live inside SignCode Pro — no external links to Municode or third parties.
+
+---
+
+## Jurisdiction Expansion Plan
+**Southeast Florida (done):** Miami-Dade, Broward, Palm Beach, Fort Lauderdale, Pompano Beach, Boca Raton, Miami Beach, Hollywood, Deerfield Beach, Pembroke Pines, Coral Springs, Miramar, West Palm Beach, Delray Beach, Sunrise
+
+**Tier 1 next:** Jacksonville, St. Petersburg, Sarasota, Cape Coral/Lee County, Port St. Lucie
+
+**Tier 2 after:** Pinellas County, Collier County/Naples, Volusia County/Daytona Beach, Pasco County

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 
 const CITY_MAP: Record<string, string> = {
+  // Miami-Dade
   'miami': 'miami-dade',
   'miami-dade': 'miami-dade',
   'hialeah': 'miami-dade',
@@ -10,38 +11,114 @@ const CITY_MAP: Record<string, string> = {
   'homestead': 'miami-dade',
   'kendall': 'miami-dade',
   'miami gardens': 'miami-dade',
+  'north miami': 'miami-dade',
+  'north miami beach': 'miami-dade',
+  'miami lakes': 'miami-dade',
+  'cutler bay': 'miami-dade',
+  'aventura': 'miami-dade',
+  'sunny isles': 'miami-dade',
+  'sunny isles beach': 'miami-dade',
+  'opa locka': 'miami-dade',
+  'sweetwater': 'miami-dade',
+
+  // Broward County (unincorporated)
   'broward': 'broward',
-  'hollywood': 'broward',
-  'pembroke pines': 'broward',
-  'miramar': 'broward',
-  'sunrise': 'broward',
+  'unincorporated broward': 'broward',
+
+  // Hollywood
+  'hollywood': 'hollywood',
+  'hallandale': 'hollywood',
+  'hallandale beach': 'hollywood',
+
+  // Pembroke Pines
+  'pembroke pines': 'pembroke-pines',
+  'pembroke': 'pembroke-pines',
+
+  // Miramar
+  'miramar': 'miramar',
+
+  // Coral Springs
+  'coral springs': 'coral-springs',
+
+  // Sunrise
+  'sunrise': 'sunrise',
+  'sawgrass': 'sunrise',
   'plantation': 'broward',
   'davie': 'broward',
   'weston': 'broward',
-  'deerfield beach': 'broward',
+  'cooper city': 'broward',
+  'tamarac': 'broward',
   'margate': 'broward',
-  'coral springs': 'broward',
+  'north lauderdale': 'broward',
+  'lauderhill': 'broward',
+  'lauderdale lakes': 'broward',
+  'west park': 'broward',
+
+  // Deerfield Beach
+  'deerfield beach': 'deerfield-beach',
+  'deerfield': 'deerfield-beach',
+
+  // Pompano Beach
   'pompano beach': 'pompano-beach',
   'pompano': 'pompano-beach',
+
+  // Fort Lauderdale
   'fort lauderdale': 'fort-lauderdale',
   'ft lauderdale': 'fort-lauderdale',
   'ft. lauderdale': 'fort-lauderdale',
+
+  // Boca Raton
   'boca raton': 'boca-raton',
   'boca': 'boca-raton',
-  'delray beach': 'palm-beach',
-  'west palm beach': 'palm-beach',
+
+  // Delray Beach
+  'delray beach': 'delray-beach',
+  'delray': 'delray-beach',
+
+  // West Palm Beach
+  'west palm beach': 'west-palm-beach',
+  'west palm': 'west-palm-beach',
+  'wpb': 'west-palm-beach',
+
+  // Palm Beach County (unincorporated)
   'palm beach': 'palm-beach',
+  'palm beach county': 'palm-beach',
   'boynton beach': 'palm-beach',
   'lake worth': 'palm-beach',
+  'lake worth beach': 'palm-beach',
   'wellington': 'palm-beach',
   'jupiter': 'palm-beach',
+  'palm beach gardens': 'palm-beach',
+  'greenacres': 'palm-beach',
+  'royal palm beach': 'palm-beach',
+  'riviera beach': 'palm-beach',
+  'lantana': 'palm-beach',
+  'loxahatchee': 'palm-beach',
+
+  // Miami Beach
   'miami beach': 'miami-beach',
   'south beach': 'miami-beach',
+  'mid beach': 'miami-beach',
+  'north beach': 'miami-beach',
+  'surfside': 'miami-beach',
+  'bal harbour': 'miami-beach',
+
+  // Orlando
   'orlando': 'orlando',
+  'winter park': 'orlando',
+  'maitland': 'orlando',
+
+  // Tampa
   'tampa': 'tampa',
+
+  // Hillsborough County
   'hillsborough': 'hillsborough',
   'brandon': 'hillsborough',
   'riverview': 'hillsborough',
+  'wesley chapel': 'hillsborough',
+  'plant city': 'hillsborough',
+  'valrico': 'hillsborough',
+  'lithia': 'hillsborough',
 };
 
 function findJurisdiction(query: string): string | null {
@@ -133,7 +210,7 @@ export default function LookupPage() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && lookup()}
-              placeholder="Type a city or county — e.g. Miami, Pompano Beach, Orlando..."
+              placeholder="Type a city or county — e.g. Miami, Pompano Beach, Hollywood..."
               style={{ flex: 1, padding: '11px 14px', border: '1px solid #E2E8F0', borderRadius: '8px', fontSize: '13px', color: '#0D1B2A', outline: 'none' }}
             />
             <button onClick={() => lookup()} disabled={status === 'loading'}
@@ -143,7 +220,7 @@ export default function LookupPage() {
           </div>
           <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: '11px', color: '#9BA8B4' }}>Quick:</span>
-            {['Miami', 'Fort Lauderdale', 'Pompano Beach', 'Boca Raton', 'Miami Beach', 'Orlando', 'Tampa'].map(c => (
+            {['Miami', 'Hollywood', 'Fort Lauderdale', 'Pompano Beach', 'Deerfield Beach', 'Boca Raton', 'Delray Beach', 'West Palm Beach', 'Orlando', 'Tampa'].map(c => (
               <button key={c} onClick={() => quickLookup(c)} style={{ padding: '3px 10px', border: '1px solid #E2E8F0', borderRadius: '20px', fontSize: '11px', color: '#5A6B7A', background: '#fff', cursor: 'pointer' }}>{c}</button>
             ))}
           </div>
@@ -159,7 +236,7 @@ export default function LookupPage() {
 
         {status === 'notfound' && (
           <div style={{ background: '#FAEEDA', border: '1px solid #F5C4B3', borderRadius: '10px', padding: '16px 20px', fontSize: '13px', color: '#633806' }}>
-            We don't have data for that jurisdiction yet. Try Miami, Fort Lauderdale, Pompano Beach, Boca Raton, Miami Beach, Orlando, or Tampa. More coming soon — <a href="/waitlist" style={{ color: '#185FA5' }}>join the waitlist</a>.
+            We don't have data for that jurisdiction yet. Try Miami, Hollywood, Fort Lauderdale, Pompano Beach, Deerfield Beach, Boca Raton, Delray Beach, or West Palm Beach. More coming soon — <a href="/waitlist" style={{ color: '#185FA5' }}>join the waitlist</a> to request yours.
           </div>
         )}
 
@@ -172,7 +249,6 @@ export default function LookupPage() {
         {status === 'found' && result && (
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
 
-            {/* Header */}
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontSize: '20px', fontWeight: '700', color: '#0D1B2A', marginBottom: '4px' }}>{result.name}</div>
@@ -183,7 +259,6 @@ export default function LookupPage() {
               </span>
             </div>
 
-            {/* Size limits */}
             <Section title="Size limits">
               <Row label="Max pylon / pole sign height" value={result.maxPylonHeight ? result.maxPylonHeight + ' ft' : 'Varies by district'} />
               <Row label="Max monument / ground sign height" value={result.maxMonumentHeight ? result.maxMonumentHeight + ' ft' : 'Varies by district'} />
@@ -192,7 +267,6 @@ export default function LookupPage() {
               <Row label="Max letter height" value={result.letterHeightMax} />
             </Section>
 
-            {/* EMC / Digital */}
             <Section title="EMC / Digital signs">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                 <span style={{ fontSize: '12px', color: '#5A6B7A' }}>EMC / digital signs allowed:</span>
@@ -203,20 +277,17 @@ export default function LookupPage() {
               {result.emcNotes && <div style={{ fontSize: '12px', color: '#5A6B7A', lineHeight: '1.6', background: '#F4F7FA', padding: '10px', borderRadius: '7px' }}>{result.emcNotes}</div>}
             </Section>
 
-            {/* Engineering & Inspections */}
             <Section title="Engineering & inspections">
               <Row label="Engineer seal required" value={result.engineerSealThreshold} />
               <Row label="Illumination standards" value={result.illuminationNotes} />
               <Row label="Inspections" value={result.inspectionRequired} />
             </Section>
 
-            {/* Fees & Timeline */}
             <Section title="Fees & timeline">
               <Row label="Permit fee" value={result.permitFee} />
               <Row label="Typical turnaround" value={result.turnaround} />
             </Section>
 
-            {/* Required docs */}
             {result.requiredDocs && result.requiredDocs.length > 0 && (
               <Section title="Required documents">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -230,14 +301,12 @@ export default function LookupPage() {
               </Section>
             )}
 
-            {/* Key restrictions */}
             {result.keyRestrictions && (
               <Section title="Key restrictions">
                 <div style={{ fontSize: '12px', color: '#5A6B7A', lineHeight: '1.7' }}>{result.keyRestrictions}</div>
               </Section>
             )}
 
-            {/* Overlay districts */}
             {result.overlayDistricts && (
               <Section title="Overlay districts & special areas">
                 <div style={{ fontSize: '12px', color: '#5A6B7A', lineHeight: '1.7', background: '#FFF8E6', padding: '10px', borderRadius: '7px', border: '1px solid #F5C4B3' }}>
@@ -246,7 +315,6 @@ export default function LookupPage() {
               </Section>
             )}
 
-            {/* Practitioner notes */}
             {result.practitionerNotes && (
               <Section title="Practitioner notes">
                 <div style={{ fontSize: '12px', color: '#0C447C', lineHeight: '1.7', background: '#E6F1FB', padding: '10px', borderRadius: '7px' }}>
@@ -255,7 +323,6 @@ export default function LookupPage() {
               </Section>
             )}
 
-            {/* Direct contact */}
             {directInfo && (
               <Section title="Direct contact">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -294,7 +361,6 @@ export default function LookupPage() {
               </Section>
             )}
 
-            {/* Footer */}
             <div style={{ padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F4F7FA' }}>
               <div style={{ fontSize: '11px', color: '#9BA8B4' }}>Always verify with the jurisdiction before submitting. Codes change.</div>
               <a href="/waitlist" style={{ padding: '7px 16px', background: '#185FA5', color: '#fff', borderRadius: '7px', fontSize: '12px', fontWeight: '500', textDecoration: 'none' }}>Get full access →</a>
@@ -307,7 +373,14 @@ export default function LookupPage() {
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E2E8F0', padding: '20px 24px' }}>
             <div style={{ fontSize: '12px', fontWeight: '600', color: '#0D1B2A', marginBottom: '14px' }}>Currently covered — Florida</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px' }}>
-              {['Miami-Dade County', 'Broward County', 'Palm Beach County', 'City of Fort Lauderdale', 'City of Pompano Beach', 'City of Boca Raton', 'City of Miami Beach', 'City of Orlando', 'City of Tampa', 'Hillsborough County'].map(j => (
+              {[
+                'Miami-Dade County','Broward County','Palm Beach County',
+                'City of Fort Lauderdale','City of Pompano Beach','City of Boca Raton',
+                'City of Miami Beach','City of Hollywood','City of Deerfield Beach',
+                'City of Pembroke Pines','City of Coral Springs','City of Miramar',
+                'City of Sunrise','City of West Palm Beach','City of Delray Beach',
+                'City of Orlando','City of Tampa','Hillsborough County'
+              ].map(j => (
                 <div key={j} style={{ padding: '8px 12px', background: '#F4F7FA', borderRadius: '7px', fontSize: '12px', color: '#5A6B7A' }}>{j}</div>
               ))}
             </div>

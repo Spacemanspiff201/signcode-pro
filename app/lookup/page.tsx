@@ -1,8 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-const JURISDICTIONS = [
+// ── Types ──────────────────────────────────────────────────────────────────
+interface CodeSection {
+  section: string;
+  title: string;
+  verbatim: string;
+  simplified: string;
+}
+
+interface JurisdictionResult {
+  jurisdiction: string;
+  county?: string;
+  maxHeight?: string;
+  maxArea?: string;
+  setback?: string;
+  emcAllowed?: boolean;
+  emcNotes?: string;
+  requiredDocs?: string[];
+  redFlags?: string[];
+  contacts?: { label: string; value: string }[];
+  fees?: string;
+  turnaround?: string;
+  practitionerNotes?: string[];
+  codeLanguage?: CodeSection[];
+  rawData?: Record<string, unknown>;
+}
+
+// ── City → jurisdiction key map ────────────────────────────────────────────
+const CITY_MAP: Record<string, string> = {
+  // Miami-Dade
+  'miami': 'miami-dade',
+  'miami-dade': 'miami-dade',
+  'miami dade': 'miami-dade',
+  'miami dade county': 'miami-dade',
+  // Broward
+  'broward': 'broward',
+  'broward county': 'broward',
+  'unincorporated broward': 'broward',
+  // Palm Beach
+  'palm beach': 'palm-beach',
+  'palm beach county': 'palm-beach',
+  // Fort Lauderdale
+  'fort lauderdale': 'fort-lauderdale',
+  'ft lauderdale': 'fort-lauderdale',
+  // Pompano Beach
+  'pompano beach': 'pompano-beach',
+  'pompano': 'pompano-beach',
+  // Boca Raton
+  'boca raton': 'boca-raton',
+  'boca': 'boca-raton',
+  // Miami Beach
+  'miami beach': 'miami-beach',
+  // Orlando
+  'orlando': 'orlando',
+  // Tampa
+  'tampa': 'tampa',
+  // Hillsborough
+  'hillsborough': 'hillsborough',
+  'hillsborough county': 'hillsborough',
+  // Southeast FL new 8
+  'hollywood': 'hollywood',
+  'deerfield beach': 'deerfield-beach',
+  'deerfield': 'deerfield-beach',
+  'pembroke pines': 'pembroke-pines',
+  'coral springs': 'coral-springs',
+  'miramar': 'miramar',
+  'west palm beach': 'west-palm-beach',
+  'west palm': 'west-palm-beach',
+  'delray beach': 'delray-beach',
+  'delray': 'delray-beach',
+  'sunrise': 'sunrise',
+};
+
+// ── Dropdown options (alphabetical) ───────────────────────────────────────
+const JURISDICTION_OPTIONS = [
   { label: 'Boca Raton', value: 'boca-raton' },
   { label: 'Broward County (Unincorporated)', value: 'broward' },
   { label: 'Coral Springs', value: 'coral-springs' },
@@ -23,469 +96,943 @@ const JURISDICTIONS = [
   { label: 'West Palm Beach', value: 'west-palm-beach' },
 ];
 
-const SIGN_LABELS: Record<string, string> = {
-  wall: '🏢 Wall Signs',
-  channelLetters: '✏️ Channel Letters',
-  monument: '🪨 Monument Signs',
-  pylon: '🚩 Pylon / Pole Signs',
-  awning: '⛺ Awning Signs',
-  projecting: '📐 Projecting Signs',
-  window: '🪟 Window Signs',
-  emc: '📺 EMC / Digital Signs',
-  temporary: '📋 Temporary Signs',
-  directional: '➡️ Directional Signs',
-};
-
-function SignTypeCard({ typeKey, rules }: { typeKey: string; rules: any }) {
-  const [open, setOpen] = useState(false);
-  const label = SIGN_LABELS[typeKey] || typeKey;
-  const isBanned =
-    (typeKey === 'pylon' && rules.simplifiedText?.toLowerCase().includes('prohibited')) ||
-    (typeKey === 'emc' && rules.emcAllowed === false);
-
-  const conf = rules.confidence || 'medium';
-  const confColor = conf === 'verified' || conf === 'high' ? '#27500A' : '#92400E';
-  const confBg = conf === 'verified' || conf === 'high' ? '#EAF3DE' : '#FEF3C7';
-  const confLabel = conf === 'verified' ? '✓ Verified' : conf === 'high' ? '✓ High' : '⚠ Verify at intake';
-
+// ── Small helpers ──────────────────────────────────────────────────────────
+function Badge({ children, color = 'blue' }: { children: React.ReactNode; color?: 'blue' | 'red' | 'green' | 'yellow' | 'gray' }) {
+  const colors = {
+    blue: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+    red: 'bg-red-500/15 text-red-300 border-red-500/30',
+    green: 'bg-green-500/15 text-green-300 border-green-500/30',
+    yellow: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
+    gray: 'bg-white/5 text-white/40 border-white/10',
+  };
   return (
-    <div style={{
-      border: `1px solid ${isBanned ? '#FECACA' : '#E2E8F0'}`,
-      borderRadius: 10,
-      marginBottom: 8,
-      background: '#fff',
-      overflow: 'hidden',
-    }}>
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer' }}
-      >
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: isBanned ? '#B91C1C' : '#0D1B2A' }}>{label}</div>
-          <div style={{ fontSize: 11, color: '#9BA8B4', marginTop: 2 }}>
-            {isBanned ? '🚫 NOT PERMITTED' : (rules.simplifiedText?.substring(0, 70) + '…') || 'Tap to expand'}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 20, background: confBg, color: confColor, fontWeight: 700 }}>{confLabel}</span>
-          <span style={{ fontSize: 16, color: '#9BA8B4' }}>{open ? '▾' : '▸'}</span>
-        </div>
-      </div>
-
-      {open && (
-        <div style={{ borderTop: '1px solid #F4F7FA', padding: '14px 16px', fontSize: 13 }}>
-
-          {/* Dimensions */}
-          {(rules.maxStructureHeightFt !== undefined || rules.maxFaceAreaSqft !== undefined || rules.maxLetterHeightIn !== undefined || rules.areaCalcValue !== undefined || rules.maxPerTenant !== undefined || rules.tempMaxSqft !== undefined) && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Dimensions</div>
-              {rules.maxStructureHeightFt !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max structure height</span><strong>{rules.maxStructureHeightFt} ft</strong></div>}
-              {rules.maxFaceAreaSqft !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max face area</span><strong>{rules.maxFaceAreaSqft} sq ft</strong></div>}
-              {rules.maxLetterHeightIn !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max letter height</span><strong>{rules.maxLetterHeightIn} in</strong></div>}
-              {rules.areaCalcMethod === 'per_linear_ft_frontage' && rules.areaCalcValue !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Area calculation</span><strong>{rules.areaCalcValue} sq ft per linear ft of frontage</strong></div>}
-              {rules.maxPerTenant !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max per tenant</span><strong>{rules.maxPerTenant}</strong></div>}
-              {rules.tempMaxSqft !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max size</span><strong>{rules.tempMaxSqft} sq ft</strong></div>}
-              {rules.landscapingRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Landscaping at base</span><strong>{rules.landscapingRequired ? 'Required' : 'Not required'}</strong></div>}
-            </div>
-          )}
-
-          {/* Illumination */}
-          {(rules.illuminationAllowed !== undefined || rules.faceLitAllowed !== undefined || rules.reverseHaloLitAllowed !== undefined || rules.openFaceNeonAllowed !== undefined) && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Illumination</div>
-              {rules.illuminationAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Illumination allowed</span><strong>{rules.illuminationAllowed ? 'Yes' : 'No'}</strong></div>}
-              {rules.faceLitAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Face lit / front lit</span><strong>{rules.faceLitAllowed ? '✓ Allowed' : '✗ Not allowed'}</strong></div>}
-              {rules.reverseHaloLitAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Reverse / halo lit</span><strong>{rules.reverseHaloLitAllowed ? '✓ Allowed' : '✗ Not allowed'}</strong></div>}
-              {rules.openFaceNeonAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Open face neon</span><strong>{rules.openFaceNeonAllowed ? '✓ Allowed' : '✗ Not allowed'}</strong></div>}
-            </div>
-          )}
-
-          {/* Timeclock / Photocell */}
-          {(rules.timeclockRequired !== undefined || rules.photocellRequired !== undefined || rules.astronomicalTimeclockRequired !== undefined) && (
-            <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '10px 12px', marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#92400E', textTransform: 'uppercase', marginBottom: 6 }}>⏰ Illumination Controls</div>
-              {rules.timeclockRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span style={{ color: '#92400E', fontSize: 12 }}>Timeclock required (city)</span><strong style={{ color: '#92400E', fontSize: 12 }}>{rules.timeclockRequired ? '✓ Yes' : 'No'}</strong></div>}
-              {rules.photocellRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span style={{ color: '#92400E', fontSize: 12 }}>Photocell required</span><strong style={{ color: '#92400E', fontSize: 12 }}>{rules.photocellRequired ? '✓ Yes' : 'No'}</strong></div>}
-              {rules.astronomicalTimeclockRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}><span style={{ color: '#92400E', fontSize: 12 }}>Astronomical timeclock</span><strong style={{ color: '#92400E', fontSize: 12 }}>{rules.astronomicalTimeclockRequired ? '✓ Required' : 'Not required'}</strong></div>}
-            </div>
-          )}
-
-          {/* EMC */}
-          {rules.emcAllowed !== undefined && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>EMC / Digital</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>EMC allowed</span><strong>{rules.emcAllowed ? 'Yes' : '🚫 No'}</strong></div>
-              {rules.emcMinMessageHoldSec !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Min message hold</span><strong>{rules.emcMinMessageHoldSec} sec</strong></div>}
-              {rules.emcMaxBrightnessDay !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max brightness (day)</span><strong>{rules.emcMaxBrightnessDay} nits</strong></div>}
-              {rules.emcMaxBrightnessNight !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max brightness (night)</span><strong>{rules.emcMaxBrightnessNight} nits</strong></div>}
-            </div>
-          )}
-
-          {/* Plain english */}
-          {rules.simplifiedText && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>Plain English</div>
-              <div style={{ background: '#F0FDF4', borderLeft: '3px solid #86EFAC', padding: '10px 12px', borderRadius: '0 8px 8px 0', lineHeight: 1.6, color: '#0D1B2A' }}>{rules.simplifiedText}</div>
-            </div>
-          )}
-
-          {/* Verbatim */}
-          {rules.verbatimText && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 5 }}>Verbatim Ordinance — {rules.codeSection}</div>
-              <div style={{ background: '#F4F7FA', borderLeft: '3px solid #BFDBFE', padding: '10px 12px', borderRadius: '0 8px 8px 0', lineHeight: 1.65, color: '#5A6B7A', fontStyle: 'italic', fontSize: 12 }}>"{rules.verbatimText}"</div>
-            </div>
-          )}
-
-          {/* Notes */}
-          {rules.notes && (
-            <div style={{ background: '#F4F7FA', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#5A6B7A', lineHeight: 1.6 }}>
-              <strong style={{ color: '#0D1B2A' }}>📌 Notes: </strong>{rules.notes}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[color]}`}>
+      {children}
+    </span>
   );
 }
 
+// ── Main Component ─────────────────────────────────────────────────────────
 export default function LookupPage() {
-  const [jur, setJur] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
-  const [data, setData] = useState<any>(null);
-  const [tab, setTab] = useState('signs');
-  const [codeView, setCodeView] = useState('plain');
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState('');
+  const [result, setResult] = useState<JurisdictionResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [codeTab, setCodeTab] = useState<'verbatim' | 'simplified'>('simplified');
+  const [codeOpen, setCodeOpen] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
-  async function doLookup() {
-    const val = jur;
-    if (!val) { alert('Please select a jurisdiction first.'); return; }
-    setStatus('loading');
-    setData(null);
-    setTab('signs');
+  const handleLookup = async () => {
+    if (!selectedJurisdiction) return;
+    setLoading(true);
+    setError('');
+    setResult(null);
+    setCodeOpen(false);
     try {
-      const r = await fetch('/api/lookup?jurisdiction=' + val);
-      const j = await r.json();
-      if (j.data) {
-        setData(j.data);
-      } else if (j.jurisdiction) {
-        setData(j);
-      } else {
-        throw new Error('No data');
-      }
-      setStatus('done');
+      const res = await fetch(`/api/lookup?jurisdiction=${selectedJurisdiction}`);
+      if (!res.ok) throw new Error('Lookup failed');
+      const data = await res.json();
+      setResult(data);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch {
-      setStatus('error');
+      setError('Could not load jurisdiction data. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const hasZoning = data?.zoningDistricts?.length > 0;
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleLookup();
+  };
 
   return (
-    <div style={{ fontFamily: "'DM Sans',sans-serif", background: '#F4F7FA', minHeight: '100vh' }}>
+    <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0;}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes glow{0%,100%{opacity:.4}50%{opacity:.7}}
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          background: #0A1628;
+          font-family: 'DM Sans', sans-serif;
+          color: #E8EDF5;
+          min-height: 100vh;
+        }
+
+        .page-wrap {
+          min-height: 100vh;
+          background: #0A1628;
+          padding-bottom: 80px;
+        }
+
+        /* ── Top bar ── */
+        .topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 32px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: rgba(10,22,40,0.95);
+          backdrop-filter: blur(12px);
+          position: sticky;
+          top: 0;
+          z-index: 50;
+        }
+        .logo-mark {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3px;
+          width: 28px;
+          height: 28px;
+        }
+        .logo-sq {
+          border-radius: 3px;
+          background: #185FA5;
+        }
+        .logo-sq.check {
+          position: relative;
+          background: #185FA5;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .logo-sq.check::after {
+          content: '✓';
+          font-size: 9px;
+          color: white;
+          font-weight: 700;
+        }
+        .logo-text {
+          font-size: 17px;
+          font-weight: 700;
+          color: #E8EDF5;
+          letter-spacing: -0.3px;
+          margin-left: 10px;
+        }
+        .logo-text span { color: #4A9FE8; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-link {
+          font-size: 14px;
+          color: rgba(232,237,245,0.55);
+          text-decoration: none;
+          transition: color 0.2s;
+          font-weight: 500;
+        }
+        .nav-link:hover { color: #E8EDF5; }
+        .nav-link.active { color: #4A9FE8; }
+        .btn-nav {
+          background: #185FA5;
+          color: white;
+          border: none;
+          padding: 8px 18px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          transition: background 0.2s;
+        }
+        .btn-nav:hover { background: #1a6fbe; }
+
+        /* ── Hero ── */
+        .hero {
+          text-align: center;
+          padding: 72px 24px 48px;
+          position: relative;
+          overflow: hidden;
+        }
+        .hero::before {
+          content: '';
+          position: absolute;
+          top: -60px; left: 50%; transform: translateX(-50%);
+          width: 700px; height: 400px;
+          background: radial-gradient(ellipse at center, rgba(24,95,165,0.18) 0%, transparent 70%);
+          pointer-events: none;
+        }
+        .hero-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(24,95,165,0.15);
+          border: 1px solid rgba(74,159,232,0.25);
+          border-radius: 100px;
+          padding: 5px 14px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #4A9FE8;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          margin-bottom: 20px;
+        }
+        .hero-title {
+          font-size: clamp(32px, 5vw, 52px);
+          font-weight: 700;
+          line-height: 1.12;
+          letter-spacing: -1.5px;
+          color: #E8EDF5;
+          margin-bottom: 16px;
+        }
+        .hero-title em {
+          font-style: normal;
+          background: linear-gradient(135deg, #4A9FE8 0%, #185FA5 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .hero-sub {
+          font-size: 17px;
+          color: rgba(232,237,245,0.55);
+          max-width: 540px;
+          margin: 0 auto 44px;
+          line-height: 1.6;
+          font-weight: 400;
+        }
+
+        /* ── Search area ── */
+        .search-wrap {
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+        .search-card {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.09);
+          border-radius: 20px;
+          padding: 28px;
+          backdrop-filter: blur(12px);
+        }
+        .search-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-bottom: 14px;
+        }
+        .input-label {
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(232,237,245,0.4);
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .coming-soon-pill {
+          background: rgba(255,193,7,0.15);
+          border: 1px solid rgba(255,193,7,0.3);
+          color: #FFC107;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          padding: 2px 7px;
+          border-radius: 100px;
+        }
+        .address-input {
+          width: 100%;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 11px;
+          padding: 13px 16px;
+          font-size: 14px;
+          color: rgba(232,237,245,0.3);
+          font-family: 'DM Sans', sans-serif;
+          cursor: not-allowed;
+          outline: none;
+        }
+        .address-input::placeholder { color: rgba(232,237,245,0.2); }
+        .select-input {
+          width: 100%;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(74,159,232,0.2);
+          border-radius: 11px;
+          padding: 13px 16px;
+          font-size: 14px;
+          color: #E8EDF5;
+          font-family: 'DM Sans', sans-serif;
+          cursor: pointer;
+          outline: none;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A9FE8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 14px center;
+          padding-right: 42px;
+          transition: border-color 0.2s;
+        }
+        .select-input:focus { border-color: rgba(74,159,232,0.6); }
+        .select-input option { background: #0D1B2A; color: #E8EDF5; }
+
+        .btn-lookup {
+          width: 100%;
+          background: linear-gradient(135deg, #185FA5 0%, #1a6fbe 100%);
+          color: white;
+          border: none;
+          padding: 14px;
+          border-radius: 11px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          font-family: 'DM Sans', sans-serif;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          box-shadow: 0 4px 20px rgba(24,95,165,0.35);
+        }
+        .btn-lookup:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 28px rgba(24,95,165,0.5);
+        }
+        .btn-lookup:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        /* ── Stats row ── */
+        .stats-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 28px;
+          margin-top: 20px;
+          flex-wrap: wrap;
+        }
+        .stat-item {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 13px;
+          color: rgba(232,237,245,0.4);
+        }
+        .stat-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: #185FA5;
+          flex-shrink: 0;
+        }
+
+        /* ── Result card ── */
+        .results-wrap {
+          max-width: 860px;
+          margin: 48px auto 0;
+          padding: 0 24px;
+        }
+        .result-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 28px;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+        .result-title {
+          font-size: 26px;
+          font-weight: 700;
+          letter-spacing: -0.6px;
+          color: #E8EDF5;
+        }
+        .result-subtitle {
+          font-size: 14px;
+          color: rgba(232,237,245,0.4);
+          margin-top: 4px;
+          font-weight: 400;
+        }
+        .result-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        /* Info grid */
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 14px;
+          margin-bottom: 24px;
+        }
+        .info-tile {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
+          padding: 18px;
+          transition: border-color 0.2s;
+        }
+        .info-tile:hover { border-color: rgba(74,159,232,0.2); }
+        .tile-label {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          color: rgba(232,237,245,0.35);
+          margin-bottom: 6px;
+        }
+        .tile-value {
+          font-size: 20px;
+          font-weight: 700;
+          color: #4A9FE8;
+          letter-spacing: -0.5px;
+          line-height: 1.2;
+        }
+        .tile-note {
+          font-size: 11px;
+          color: rgba(232,237,245,0.35);
+          margin-top: 4px;
+          line-height: 1.4;
+        }
+
+        /* Section card */
+        .section-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 16px;
+          padding: 22px 24px;
+          margin-bottom: 16px;
+        }
+        .section-title {
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          color: rgba(232,237,245,0.35);
+          margin-bottom: 14px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .section-title-icon {
+          width: 20px; height: 20px;
+          border-radius: 5px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 11px;
+          flex-shrink: 0;
+        }
+        .icon-blue { background: rgba(24,95,165,0.25); color: #4A9FE8; }
+        .icon-red { background: rgba(239,68,68,0.15); color: #F87171; }
+        .icon-green { background: rgba(34,197,94,0.12); color: #4ADE80; }
+        .icon-yellow { background: rgba(234,179,8,0.12); color: #FACC15; }
+
+        .list-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 9px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          font-size: 14px;
+          color: rgba(232,237,245,0.75);
+          line-height: 1.5;
+        }
+        .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .list-bullet {
+          width: 5px; height: 5px;
+          border-radius: 50%;
+          background: #185FA5;
+          flex-shrink: 0;
+          margin-top: 8px;
+        }
+        .list-bullet.red { background: #EF4444; }
+        .list-bullet.yellow { background: #EAB308; }
+        .list-bullet.green { background: #22C55E; }
+
+        /* EMC badge */
+        .emc-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 18px;
+          border-radius: 11px;
+          margin-bottom: 14px;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .emc-allowed { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #4ADE80; }
+        .emc-banned { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #F87171; }
+
+        /* ── Code Language section ── */
+        .code-section {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 16px;
+          margin-bottom: 16px;
+          overflow: hidden;
+        }
+        .code-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 18px 24px;
+          cursor: pointer;
+          transition: background 0.2s;
+          user-select: none;
+        }
+        .code-header:hover { background: rgba(255,255,255,0.02); }
+        .code-header-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .code-icon {
+          width: 36px; height: 36px;
+          background: rgba(24,95,165,0.2);
+          border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        .code-header-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #E8EDF5;
+        }
+        .code-header-sub {
+          font-size: 12px;
+          color: rgba(232,237,245,0.35);
+          margin-top: 2px;
+        }
+        .code-chevron {
+          color: rgba(232,237,245,0.35);
+          transition: transform 0.25s;
+          font-size: 18px;
+        }
+        .code-chevron.open { transform: rotate(180deg); }
+
+        .code-body {
+          border-top: 1px solid rgba(255,255,255,0.06);
+          overflow: hidden;
+        }
+
+        /* Tab toggle */
+        .tab-toggle {
+          display: flex;
+          gap: 4px;
+          padding: 16px 24px 0;
+        }
+        .tab-btn {
+          padding: 7px 16px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          font-family: 'DM Sans', sans-serif;
+          border: 1px solid transparent;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .tab-btn.active {
+          background: rgba(24,95,165,0.25);
+          border-color: rgba(74,159,232,0.35);
+          color: #4A9FE8;
+        }
+        .tab-btn.inactive {
+          background: transparent;
+          border-color: rgba(255,255,255,0.08);
+          color: rgba(232,237,245,0.45);
+        }
+        .tab-btn.inactive:hover {
+          color: rgba(232,237,245,0.7);
+          border-color: rgba(255,255,255,0.15);
+        }
+
+        .code-sections-list { padding: 16px 24px 24px; }
+
+        .code-entry {
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          padding: 16px 0;
+        }
+        .code-entry:last-child { border-bottom: none; padding-bottom: 0; }
+        .code-entry-header {
+          display: flex;
+          align-items: baseline;
+          gap: 10px;
+          margin-bottom: 8px;
+        }
+        .code-section-num {
+          font-family: 'DM Mono', monospace;
+          font-size: 11px;
+          font-weight: 500;
+          color: #4A9FE8;
+          background: rgba(24,95,165,0.15);
+          padding: 2px 8px;
+          border-radius: 5px;
+          flex-shrink: 0;
+        }
+        .code-entry-title {
+          font-size: 13px;
+          font-weight: 600;
+          color: rgba(232,237,245,0.65);
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
+        .code-verbatim {
+          font-family: 'DM Mono', monospace;
+          font-size: 12.5px;
+          line-height: 1.7;
+          color: rgba(232,237,245,0.65);
+          background: rgba(0,0,0,0.2);
+          border-left: 3px solid rgba(74,159,232,0.3);
+          padding: 12px 16px;
+          border-radius: 0 8px 8px 0;
+        }
+        .code-simplified {
+          font-size: 14px;
+          line-height: 1.65;
+          color: rgba(232,237,245,0.75);
+          background: rgba(34,197,94,0.04);
+          border-left: 3px solid rgba(34,197,94,0.25);
+          padding: 12px 16px;
+          border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Contacts ── */
+        .contacts-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .contact-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .contact-label {
+          font-size: 13px;
+          color: rgba(232,237,245,0.45);
+          font-weight: 500;
+          min-width: 130px;
+        }
+        .contact-value {
+          font-size: 13px;
+          color: #E8EDF5;
+          font-weight: 500;
+          text-align: right;
+        }
+
+        /* ── Loading ── */
+        .loading-wrap {
+          text-align: center;
+          padding: 56px 24px;
+        }
+        .spinner {
+          width: 40px; height: 40px;
+          border: 3px solid rgba(74,159,232,0.2);
+          border-top-color: #185FA5;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Error ── */
+        .error-box {
+          background: rgba(239,68,68,0.08);
+          border: 1px solid rgba(239,68,68,0.2);
+          border-radius: 12px;
+          padding: 16px 20px;
+          color: #F87171;
+          font-size: 14px;
+          margin-top: 24px;
+          max-width: 720px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        /* ── Practitioner notes ── */
+        .note-item {
+          display: flex;
+          gap: 10px;
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          font-size: 13.5px;
+          color: rgba(232,237,245,0.65);
+          line-height: 1.55;
+        }
+        .note-item:last-child { border-bottom: none; }
+        .note-emoji { flex-shrink: 0; }
+
+        @media (max-width: 640px) {
+          .search-grid { grid-template-columns: 1fr; }
+          .topbar { padding: 14px 18px; }
+          .nav-links { gap: 14px; }
+          .result-header { flex-direction: column; }
+          .info-grid { grid-template-columns: 1fr 1fr; }
+        }
       `}</style>
 
-      {/* NAV */}
-      <nav style={{ background: 'rgba(255,255,255,0.95)', borderBottom: '1px solid #E2E8F0', position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(10px)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <svg width="26" height="26" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#185FA5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
+      <div className="page-wrap">
+        {/* Top bar */}
+        <nav className="topbar">
+          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 0 }}>
+            <div className="logo-mark">
+              <div className="logo-sq" />
+              <div className="logo-sq" />
+              <div className="logo-sq" />
+              <div className="logo-sq check" />
+            </div>
+            <span className="logo-text">Sign<span>Code</span> Pro</span>
           </a>
-          <div style={{ display: 'flex', gap: 28 }}>
-            <a href="/lookup" style={{ fontSize: 13, color: '#185FA5', textDecoration: 'none', fontWeight: 600 }}>Lookup</a>
-            <a href="/jobs" style={{ fontSize: 13, color: '#5A6B7A', textDecoration: 'none', fontWeight: 500 }}>Jobs</a>
-            <a href="/waitlist" style={{ fontSize: 13, color: '#5A6B7A', textDecoration: 'none', fontWeight: 500 }}>Waitlist</a>
+          <div className="nav-links">
+            <a href="/lookup" className="nav-link active">Lookup</a>
+            <a href="/jobs" className="nav-link">Jobs</a>
+            <a href="/waitlist" className="nav-link">Waitlist</a>
+            <button className="btn-nav" onClick={() => window.location.href = '/waitlist'}>Get Beta Access</button>
           </div>
-          <a href="/waitlist" style={{ padding: '8px 18px', background: '#185FA5', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Join waitlist</a>
-        </div>
-      </nav>
+        </nav>
 
-      {/* HERO */}
-      <div style={{ background: '#0D1B2A', padding: '52px 32px 60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(ellipse,rgba(24,95,165,.12) 0%,transparent 65%)', animation: 'glow 6s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'rgba(24,95,165,.3)', color: '#85B7EB', fontSize: 12, fontWeight: 600, borderRadius: 20, marginBottom: 18 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#85B7EB' }} />
-            Florida Sign Permit Intelligence
+        {/* Hero */}
+        <section className="hero">
+          <div className="hero-eyebrow">
+            <span>⚡</span> Florida Sign Permit Intelligence
           </div>
-          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 12 }}>
-            Look up any jurisdiction.<br /><span style={{ color: '#85B7EB' }}>In seconds, not hours.</span>
+          <h1 className="hero-title">
+            Look up any jurisdiction.<br />
+            <em>In seconds, not hours.</em>
           </h1>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,.5)', lineHeight: 1.65, marginBottom: 32, maxWidth: 500 }}>
-            Sign codes by sign type, required docs, red flags, and contact info — researched and verified for Florida's most active markets.
+          <p className="hero-sub">
+            Sign codes, required docs, red flags, and real contact info — researched and verified for Florida's most active markets.
           </p>
+        </section>
 
-          {/* Search box */}
-          <div style={{ background: 'rgba(255,255,255,.07)', borderRadius: 14, border: '1px solid rgba(255,255,255,.1)', padding: '22px 24px', maxWidth: 640 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+        {/* Search card */}
+        <div className="search-wrap">
+          <div className="search-card">
+            <div className="search-grid">
+              {/* Address search — coming soon */}
               <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>
-                  Address Search <span style={{ background: '#F59E0B', color: '#fff', fontSize: 9, padding: '1px 5px', borderRadius: 20, fontWeight: 700, marginLeft: 4 }}>SOON</span>
+                <div className="input-label">
+                  📍 Address Search
+                  <span className="coming-soon-pill">Coming Soon</span>
                 </div>
-                <input disabled placeholder="123 Main St, Fort Lauderdale…" style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, fontSize: 13, color: 'rgba(255,255,255,.25)', background: 'rgba(255,255,255,.05)', cursor: 'not-allowed', fontFamily: 'inherit' }} />
+                <input
+                  className="address-input"
+                  type="text"
+                  placeholder="123 Main St, Fort Lauderdale, FL…"
+                  disabled
+                />
               </div>
+
+              {/* Jurisdiction dropdown */}
               <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Select Jurisdiction</div>
+                <div className="input-label">
+                  🗂 Select Jurisdiction
+                </div>
                 <select
-                  value={jur}
-                  onChange={e => setJur(e.target.value)}
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,.15)', borderRadius: 7, fontSize: 13, color: jur ? '#fff' : 'rgba(255,255,255,.4)', background: 'rgba(255,255,255,.08)', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+                  className="select-input"
+                  value={selectedJurisdiction}
+                  onChange={e => setSelectedJurisdiction(e.target.value)}
+                  onKeyDown={handleKeyDown}
                 >
                   <option value="">— Choose a city or county —</option>
-                  {JURISDICTIONS.map(o => (
-                    <option key={o.value} value={o.value} style={{ background: '#1a2a3a', color: '#fff' }}>{o.label}</option>
+                  {JURISDICTION_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
             </div>
+
             <button
-              onClick={doLookup}
-              style={{ width: '100%', padding: 13, background: '#185FA5', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(24,95,165,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              className="btn-lookup"
+              onClick={handleLookup}
+              disabled={!selectedJurisdiction || loading}
             >
-              {status === 'loading'
-                ? <><div style={{ width: 15, height: 15, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> Loading...</>
-                : '🔍 Run Permit Lookup'}
-            </button>
-          </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.22)', marginTop: 12 }}>18 jurisdictions covered · Verified sign code data · Verbatim ordinance text</div>
-        </div>
-      </div>
-
-      {/* STATS */}
-      <div style={{ background: 'linear-gradient(135deg,#0D1B2A 0%,#163C6A 50%,#185FA5 100%)', padding: '36px 32px', position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: .04, backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div style={{ maxWidth: 860, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', position: 'relative', zIndex: 1 }}>
-          {[['18','FL jurisdictions'],['2–4 hrs','Saved per job'],['$0','Cost to look up'],['100%','Publicly sourced']].map(([n,l],i) => (
-            <div key={n} style={{ textAlign: 'center', padding: '0 16px', borderRight: i < 3 ? '1px solid rgba(255,255,255,.1)' : 'none' }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-1px', lineHeight: 1, marginBottom: 5 }}>{n}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>{l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ERROR */}
-      {status === 'error' && (
-        <div style={{ maxWidth: 860, margin: '24px auto', padding: '0 32px' }}>
-          <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '14px 18px', color: '#B91C1C', fontSize: 13 }}>⚠ Could not load data. Please try again.</div>
-        </div>
-      )}
-
-      {/* LOADING */}
-      {status === 'loading' && (
-        <div style={{ padding: '64px 32px', textAlign: 'center' }}>
-          <div style={{ width: 36, height: 36, border: '3px solid #E2E8F0', borderTopColor: '#185FA5', borderRadius: '50%', animation: 'spin .8s linear infinite', margin: '0 auto 16px' }} />
-          <div style={{ fontSize: 14, color: '#5A6B7A' }}>Pulling jurisdiction data...</div>
-        </div>
-      )}
-
-      {/* RESULTS */}
-      {status === 'done' && data && (
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '36px 32px 80px' }}>
-
-          {/* Header */}
-          <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 14, boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
-              <div>
-                <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0D1B2A', letterSpacing: '-.5px', marginBottom: 3 }}>{data.jurisdiction}</h2>
-                <div style={{ fontSize: 12, color: '#9BA8B4' }}>
-                  {data.county}{data.lastVerified && ` · Last verified: ${new Date(data.lastVerified).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`}
-                </div>
-                {data.codeChapter && <div style={{ marginTop: 6, fontSize: 11, color: '#5A6B7A', background: '#F4F7FA', padding: '3px 9px', borderRadius: 5, display: 'inline-block' }}>{data.codeChapter}</div>}
-              </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {data.ownerSignatureRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FEF3C7', color: '#92400E', fontWeight: 700 }}>Owner sig required</span>}
-                {data.masterSignProgramRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>MSP required</span>}
-                {data.designReviewRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>Design review required</span>}
-                {data.contractorRegistrationRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>Contractor reg. required</span>}
-                {data.emcAllowed === true && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#DCFCE7', color: '#15803D', fontWeight: 700 }}>✓ EMC Allowed</span>}
-                {data.emcAllowed === false && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>✗ EMC Banned</span>}
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, paddingTop: 14, borderTop: '1px solid #F4F7FA' }}>
-              {[['Turnaround', data.turnaround], ['Fees', data.fees], ['Phone', data.phone]].map(([l,v]) => v ? (
-                <div key={String(l)}><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>{l}</div><div style={{ fontSize: 12, fontWeight: 600, color: '#0D1B2A' }}>{v}</div></div>
-              ) : null)}
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-            {[
-              { key: 'signs',    label: hasZoning ? '📐 Sign Types' : '📋 Summary' },
-              { key: 'flags',    label: `🚩 Red Flags (${data.redFlags?.length || 0})` },
-              { key: 'docs',     label: `📄 Docs (${data.requiredDocs?.length || 0})` },
-              { key: 'contacts', label: '📞 Contacts' },
-              { key: 'code',     label: '📖 Code Language' },
-            ].map(({ key, label }) => (
-              <button key={key} onClick={() => setTab(key)}
-                style={{ fontSize: 12, padding: '6px 13px', borderRadius: 20, border: '1px solid', borderColor: tab === key ? '#185FA5' : '#E2E8F0', background: tab === key ? '#185FA5' : '#fff', color: tab === key ? '#fff' : '#5A6B7A', cursor: 'pointer', fontFamily: 'inherit', fontWeight: tab === key ? 700 : 400 }}>
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* SIGN TYPES */}
-          {tab === 'signs' && (
-            <>
-              {hasZoning ? data.zoningDistricts.map((d: any, di: number) => (
-                <div key={di} style={{ marginBottom: 24 }}>
-                  <div style={{ background: '#0D1B2A', borderRadius: 10, padding: '11px 16px', marginBottom: 10 }}>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', marginBottom: 2 }}>{d.districtCode} — {d.districtName}</div>
-                    {d.overlay && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)' }}>{d.overlay}</div>}
-                  </div>
-                  {Object.entries(d.signTypes).map(([k, v]) => (
-                    <SignTypeCard key={k} typeKey={k} rules={v} />
-                  ))}
-                </div>
-              )) : (
-                <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-                  <div style={{ background: '#FEF3C7', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#92400E' }}>
-                    ⚠ This jurisdiction hasn't been fully broken out by sign type yet. Full detail coming soon.
-                  </div>
-                  {data.maxHeight && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A', fontSize: 13 }}>Max height</span><strong style={{ fontSize: 13 }}>{data.maxHeight}</strong></div>}
-                  {data.maxArea && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A', fontSize: 13 }}>Max area</span><strong style={{ fontSize: 13 }}>{data.maxArea}</strong></div>}
-                  {data.setback && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A', fontSize: 13 }}>Setback</span><strong style={{ fontSize: 13 }}>{data.setback}</strong></div>}
-                  {data.emcNotes && <div style={{ marginTop: 10, background: '#F4F7FA', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#5A6B7A' }}>{data.emcNotes}</div>}
-                  {data.engineerSealRequired && <div style={{ marginTop: 8, background: '#FEF3C7', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#92400E' }}><strong>Engineer seal: </strong>{data.engineerSealRequired}</div>}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* RED FLAGS */}
-          {tab === 'flags' && (
-            <div>
-              {data.redFlags?.length > 0
-                ? data.redFlags.map((f: string, i: number) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid #FECACA', padding: '12px 16px', display: 'flex', gap: 10, marginBottom: 8, boxShadow: '0 1px 3px rgba(0,0,0,.03)' }}>
-                    <span>🚩</span>
-                    <span style={{ fontSize: 13, color: '#0D1B2A', lineHeight: 1.55 }}>{f}</span>
-                  </div>
-                ))
-                : <p style={{ fontSize: 13, color: '#9BA8B4' }}>No red flags on file.</p>
-              }
-              {data.practitionerNotes?.length > 0 && (
-                <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#5A6B7A', marginBottom: 8, textTransform: 'uppercase' }}>Field Notes</div>
-                  {data.practitionerNotes.map((n: string, i: number) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0', padding: '11px 14px', display: 'flex', gap: 8, marginBottom: 6 }}>
-                      <span style={{ color: '#185FA5', fontWeight: 700 }}>→</span>
-                      <span style={{ fontSize: 13, color: '#5A6B7A', lineHeight: 1.55 }}>{n}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* DOCS */}
-          {tab === 'docs' && (
-            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-              {data.requiredDocs?.length > 0
-                ? data.requiredDocs.map((d: string, i: number) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: i < data.requiredDocs.length - 1 ? '1px solid #F4F7FA' : 'none' }}>
-                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: '#185FA5' }}>{i + 1}</span>
-                    </div>
-                    <span style={{ fontSize: 13, color: '#0D1B2A', lineHeight: 1.5 }}>{d}</span>
-                  </div>
-                ))
-                : <p style={{ fontSize: 13, color: '#9BA8B4' }}>No required docs on file yet.</p>
-              }
-            </div>
-          )}
-
-          {/* CONTACTS */}
-          {tab === 'contacts' && (
-            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-              {data.contacts?.length > 0
-                ? data.contacts.map((c: any, i: number) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: i < data.contacts.length - 1 ? '1px solid #F4F7FA' : 'none', flexWrap: 'wrap', gap: 8 }}>
-                    <span style={{ fontSize: 13, color: '#5A6B7A' }}>{c.label}</span>
-                    {c.value.startsWith('http')
-                      ? <a href={c.value} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 700, color: '#185FA5', textDecoration: 'none' }}>Open portal →</a>
-                      : <span style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A' }}>{c.value}</span>
-                    }
-                  </div>
-                ))
-                : <p style={{ fontSize: 13, color: '#9BA8B4' }}>No contacts on file yet.</p>
-              }
-              {data.portalUrl && <a href={data.portalUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 14, padding: '9px 18px', background: '#185FA5', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Open Permit Portal →</a>}
-            </div>
-          )}
-
-          {/* CODE LANGUAGE */}
-          {tab === 'code' && (
-            <div>
-              {data.codeLanguage?.length > 0 ? (
+              {loading ? (
                 <>
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
-                    {['plain', 'verbatim'].map(t => (
-                      <button key={t} onClick={() => setCodeView(t)}
-                        style={{ fontSize: 12, padding: '5px 13px', borderRadius: 20, border: '1px solid', borderColor: codeView === t ? '#185FA5' : '#E2E8F0', background: codeView === t ? '#185FA5' : '#fff', color: codeView === t ? '#fff' : '#5A6B7A', cursor: 'pointer', fontFamily: 'inherit', fontWeight: codeView === t ? 700 : 400 }}>
-                        {t === 'plain' ? 'Plain English' : 'Verbatim Ordinance'}
-                      </button>
-                    ))}
-                  </div>
-                  {data.codeLanguage.map((cs: any, i: number) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E2E8F0', padding: '14px 16px', marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#185FA5', background: 'rgba(24,95,165,.07)', padding: '2px 7px', borderRadius: 5 }}>{cs.section}</span>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#0D1B2A' }}>{cs.title}</span>
-                      </div>
-                      {codeView === 'verbatim'
-                        ? <div style={{ fontFamily: 'monospace', fontSize: 12, lineHeight: 1.65, color: '#5A6B7A', background: '#F4F7FA', borderLeft: '3px solid #BFDBFE', padding: '10px 12px', borderRadius: '0 8px 8px 0' }}>{cs.verbatim}</div>
-                        : <div style={{ fontSize: 13, lineHeight: 1.6, color: '#0D1B2A', background: '#F0FDF4', borderLeft: '3px solid #86EFAC', padding: '10px 12px', borderRadius: '0 8px 8px 0' }}>{cs.simplified}</div>
-                      }
-                    </div>
-                  ))}
+                  <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
+                  Looking up…
                 </>
               ) : (
-                <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '32px', textAlign: 'center', color: '#9BA8B4', fontSize: 13 }}>No code language on file yet for this jurisdiction.</div>
+                <>🔍 Run Permit Lookup</>
+              )}
+            </button>
+          </div>
+
+          {/* Stats row */}
+          <div className="stats-row">
+            <div className="stat-item"><span className="stat-dot" />18 jurisdictions covered</div>
+            <div className="stat-item"><span className="stat-dot" />Verified sign code data</div>
+            <div className="stat-item"><span className="stat-dot" />Real-world practitioner notes</div>
+            <div className="stat-item"><span className="stat-dot" />Verbatim ordinance text</div>
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && <div className="error-box">⚠️ {error}</div>}
+
+        {/* Loading */}
+        {loading && (
+          <div className="loading-wrap">
+            <div className="spinner" />
+            <p style={{ color: 'rgba(232,237,245,0.4)', fontSize: 14 }}>Pulling jurisdiction data…</p>
+          </div>
+        )}
+
+        {/* Results */}
+        {result && !loading && (
+          <div className="results-wrap" ref={resultRef}>
+            {/* Header */}
+            <div className="result-header">
+              <div>
+                <div className="result-title">{result.jurisdiction}</div>
+                {result.county && <div className="result-subtitle">{result.county}</div>}
+              </div>
+              <div className="result-badges">
+                {result.emcAllowed === true && <Badge color="green">✓ EMC Allowed</Badge>}
+                {result.emcAllowed === false && <Badge color="red">✗ EMC Banned</Badge>}
+                {result.turnaround && <Badge color="blue">⏱ {result.turnaround}</Badge>}
+              </div>
+            </div>
+
+            {/* Key numbers */}
+            <div className="info-grid">
+              {result.maxHeight && (
+                <div className="info-tile">
+                  <div className="tile-label">Max Height</div>
+                  <div className="tile-value">{result.maxHeight}</div>
+                </div>
+              )}
+              {result.maxArea && (
+                <div className="info-tile">
+                  <div className="tile-label">Max Sign Area</div>
+                  <div className="tile-value">{result.maxArea}</div>
+                </div>
+              )}
+              {result.setback && (
+                <div className="info-tile">
+                  <div className="tile-label">Setback</div>
+                  <div className="tile-value">{result.setback}</div>
+                </div>
+              )}
+              {result.fees && (
+                <div className="info-tile">
+                  <div className="tile-label">Permit Fees</div>
+                  <div className="tile-value" style={{ fontSize: 16 }}>{result.fees}</div>
+                </div>
               )}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* DISCLAIMER */}
-      <div style={{ padding: '20px 32px', background: '#F4F7FA', borderTop: '1px solid #E8EDF2' }}>
-        <p style={{ fontSize: 11, color: '#B4B2A9', lineHeight: 1.7, textAlign: 'center', maxWidth: 700, margin: '0 auto' }}>
-          SignCode Pro provides general permit guidance based on publicly available sources. Requirements vary by jurisdiction and change over time. Always verify directly with the jurisdiction before submitting. Not a legal authority.
-        </p>
+            {/* EMC note */}
+            {result.emcNotes && (
+              <div className={`emc-row ${result.emcAllowed ? 'emc-allowed' : 'emc-banned'}`}>
+                <span>{result.emcAllowed ? '✅' : '🚫'}</span>
+                <span>{result.emcNotes}</span>
+              </div>
+            )}
+
+            {/* Red flags */}
+            {result.redFlags && result.redFlags.length > 0 && (
+              <div className="section-card">
+                <div className="section-title">
+                  <div className="section-title-icon icon-red">🚩</div>
+                  Red Flags & Watch Items
+                </div>
+                {result.redFlags.map((flag, i) => (
+                  <div key={i} className="list-item">
+                    <div className="list-bullet red" />
+                    <span>{flag}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Required docs */}
+            {result.requiredDocs && result.requiredDocs.length > 0 && (
+              <div className="section-card">
+                <div className="section-title">
+                  <div className="section-title-icon icon-blue">📋</div>
+                  Required Documents
+                </div>
+                {result.requiredDocs.map((doc, i) => (
+                  <div key={i} className="list-item">
+                    <div className="list-bullet" />
+                    <span>{doc}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Contacts */}
+            {result.contacts && result.contacts.length > 0 && (
+              <div className="section-card">
+                <div className="section-title">
+                  <div className="section-title-icon icon-green">📞</div>
+                  Contacts & Portals
+                </div>
+                <div className="contacts-grid">
+                  {result.contacts.map((c, i) => (
+                    <div key={i} className="contact-row">
+                      <span className="contact-label">{c.label}</span>
+                      <span className="contact-value">{c.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Practitioner notes */}
+            {result.practitionerNotes && result.practitionerNotes.length > 0 && (
+              <div className="section-card">
+                <div className="section-title">
+                  <div className="section-title-icon icon-yellow">🔧</div>
+                  Field Notes
+                </div>
+                {result.practitionerNotes.map((note, i) => (
+                  <div key={i} className="note-item">
+                    <span className="note-emoji">→</span>
+                    <span>{note}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── Official Code Language ── */}
+            {result.codeLanguage && result.codeLanguage.length > 0 && (
+              <div className="code-section">
+                <div className="code-header" onClick={() => setCodeOpen(o => !o)}>
+                  <div className="code-header-left">
+                    <div className="code-icon">📜</div>
+                    <div>
+                      <div className="code-header-title">Official Code Language</div>
+                      <div className="code-header-sub">{result.codeLanguage.length} ordinance sections · verbatim + plain English</div>
+                    </div>
+                  </div>
+                  <span className={`code-chevron ${codeOpen ? 'open' : ''}`}>⌄</span>
+                </div>
+
+                {codeOpen && (
+                  <div className="code-body">
+                    <div className="tab-toggle">
+                      <button
+                        className={`tab-btn ${codeTab === 'simplified' ? 'active' : 'inactive'}`}
+                        onClick={() => setCodeTab('simplified')}
+                      >
+                        ✏️ Plain English
+                      </button>
+                      <button
+                        className={`tab-btn ${codeTab === 'verbatim' ? 'active' : 'inactive'}`}
+                        onClick={() => setCodeTab('verbatim')}
+                      >
+                        ⚖️ Verbatim Code
+                      </button>
+                    </div>
+
+                    <div className="code-sections-list">
+                      {result.codeLanguage.map((cs, i) => (
+                        <div key={i} className="code-entry">
+                          <div className="code-entry-header">
+                            <span className="code-section-num">{cs.section}</span>
+                            <span className="code-entry-title">{cs.title}</span>
+                          </div>
+                          {codeTab === 'verbatim' ? (
+                            <div className="code-verbatim">{cs.verbatim}</div>
+                          ) : (
+                            <div className="code-simplified">{cs.simplified}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* CTA */}
-      <section style={{ padding: '72px 32px', background: 'linear-gradient(135deg,#0D1B2A 0%,#185FA5 100%)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: .04, backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 500, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 34, fontWeight: 800, color: '#fff', marginBottom: 12, letterSpacing: '-.5px', lineHeight: 1.18 }}>A better starting point<br />for every permit job</h2>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,.6)', marginBottom: 28, lineHeight: 1.7 }}>Join sign professionals already on the waitlist.</p>
-          <a href="/waitlist" style={{ display: 'inline-block', padding: '12px 26px', background: '#fff', color: '#185FA5', borderRadius: 9, fontSize: 13, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 16px rgba(0,0,0,.2)' }}>Join waitlist →</a>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={{ padding: '22px 32px', borderTop: '1px solid #E8EDF2', background: '#fff' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-            <svg width="18" height="18" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#185FA5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
-          </div>
-          <div style={{ display: 'flex', gap: 22 }}>
-            {[['Lookup','/lookup'],['Jobs','/jobs'],['Waitlist','/waitlist']].map(([l,h]) => (
-              <a key={l} href={h} style={{ fontSize: 12, color: '#9BA8B4', textDecoration: 'none', fontWeight: 500 }}>{l}</a>
-            ))}
-          </div>
-          <div style={{ fontSize: 11, color: '#B4B2A9' }}>© 2026 SignCode Pro. All rights reserved.</div>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

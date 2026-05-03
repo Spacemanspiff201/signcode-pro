@@ -161,8 +161,28 @@ export default function LookupPage() {
 
         .page-wrap {
           min-height: 100vh;
-          background: #0A1628;
+          background:
+            linear-gradient(180deg,
+              #0A1628 0%,
+              #0D2140 30%,
+              #0f2a52 55%,
+              #f0f4fa 55%,
+              #f0f4fa 100%
+            );
           padding-bottom: 80px;
+        }
+
+        /* faint dot-grid overlay on the dark hero section */
+        .page-wrap::before {
+          content: '';
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          height: 56%;
+          background-image:
+            radial-gradient(circle, rgba(74,159,232,0.18) 1px, transparent 1px);
+          background-size: 32px 32px;
+          pointer-events: none;
+          z-index: 0;
         }
 
         /* ── Top bar ── */
@@ -172,8 +192,8 @@ export default function LookupPage() {
           justify-content: space-between;
           padding: 18px 32px;
           border-bottom: 1px solid rgba(255,255,255,0.06);
-          background: rgba(10,22,40,0.95);
-          backdrop-filter: blur(12px);
+          background: rgba(10,22,40,0.92);
+          backdrop-filter: blur(14px);
           position: sticky;
           top: 0;
           z-index: 50;
@@ -237,6 +257,7 @@ export default function LookupPage() {
           text-align: center;
           padding: 72px 24px 48px;
           position: relative;
+          z-index: 1;
           overflow: hidden;
         }
         .hero::before {
@@ -244,7 +265,7 @@ export default function LookupPage() {
           position: absolute;
           top: -60px; left: 50%; transform: translateX(-50%);
           width: 700px; height: 400px;
-          background: radial-gradient(ellipse at center, rgba(24,95,165,0.18) 0%, transparent 70%);
+          background: radial-gradient(ellipse at center, rgba(24,95,165,0.22) 0%, transparent 70%);
           pointer-events: none;
         }
         .hero-eyebrow {
@@ -291,13 +312,16 @@ export default function LookupPage() {
           max-width: 720px;
           margin: 0 auto;
           padding: 0 24px;
+          position: relative;
+          z-index: 1;
         }
         .search-card {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.09);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.13);
           border-radius: 20px;
           padding: 28px;
-          backdrop-filter: blur(12px);
+          backdrop-filter: blur(16px);
+          box-shadow: 0 8px 48px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.08) inset;
         }
         .search-grid {
           display: grid;
@@ -397,6 +421,8 @@ export default function LookupPage() {
           gap: 28px;
           margin-top: 20px;
           flex-wrap: wrap;
+          position: relative;
+          z-index: 1;
         }
         .stat-item {
           display: flex;
@@ -417,6 +443,8 @@ export default function LookupPage() {
           max-width: 860px;
           margin: 48px auto 0;
           padding: 0 24px;
+          position: relative;
+          z-index: 1;
         }
         .result-header {
           display: flex;
@@ -430,11 +458,11 @@ export default function LookupPage() {
           font-size: 26px;
           font-weight: 700;
           letter-spacing: -0.6px;
-          color: #E8EDF5;
+          color: #0D1B2A;
         }
         .result-subtitle {
           font-size: 14px;
-          color: rgba(232,237,245,0.4);
+          color: rgba(13,27,42,0.45);
           margin-top: 4px;
           font-weight: 400;
         }
@@ -448,49 +476,54 @@ export default function LookupPage() {
           margin-bottom: 24px;
         }
         .info-tile {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: #ffffff;
+          border: 1px solid rgba(13,27,42,0.08);
           border-radius: 14px;
           padding: 18px;
-          transition: border-color 0.2s;
+          box-shadow: 0 2px 12px rgba(13,27,42,0.06);
+          transition: box-shadow 0.2s, transform 0.2s;
         }
-        .info-tile:hover { border-color: rgba(74,159,232,0.2); }
+        .info-tile:hover {
+          box-shadow: 0 6px 24px rgba(24,95,165,0.12);
+          transform: translateY(-1px);
+        }
         .tile-label {
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.8px;
           text-transform: uppercase;
-          color: rgba(232,237,245,0.35);
+          color: rgba(13,27,42,0.35);
           margin-bottom: 6px;
         }
         .tile-value {
           font-size: 20px;
           font-weight: 700;
-          color: #4A9FE8;
+          color: #185FA5;
           letter-spacing: -0.5px;
           line-height: 1.2;
         }
         .tile-note {
           font-size: 11px;
-          color: rgba(232,237,245,0.35);
+          color: rgba(13,27,42,0.35);
           margin-top: 4px;
           line-height: 1.4;
         }
 
-        /* Section card */
+        /* Section card — white on white bg */
         .section-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: #ffffff;
+          border: 1px solid rgba(13,27,42,0.07);
           border-radius: 16px;
           padding: 22px 24px;
           margin-bottom: 16px;
+          box-shadow: 0 2px 12px rgba(13,27,42,0.05);
         }
         .section-title {
           font-size: 12px;
           font-weight: 700;
           letter-spacing: 0.8px;
           text-transform: uppercase;
-          color: rgba(232,237,245,0.35);
+          color: rgba(13,27,42,0.35);
           margin-bottom: 14px;
           display: flex;
           align-items: center;
@@ -503,19 +536,19 @@ export default function LookupPage() {
           font-size: 11px;
           flex-shrink: 0;
         }
-        .icon-blue { background: rgba(24,95,165,0.25); color: #4A9FE8; }
-        .icon-red { background: rgba(239,68,68,0.15); color: #F87171; }
-        .icon-green { background: rgba(34,197,94,0.12); color: #4ADE80; }
-        .icon-yellow { background: rgba(234,179,8,0.12); color: #FACC15; }
+        .icon-blue { background: rgba(24,95,165,0.12); color: #185FA5; }
+        .icon-red { background: rgba(239,68,68,0.1); color: #DC2626; }
+        .icon-green { background: rgba(34,197,94,0.1); color: #16A34A; }
+        .icon-yellow { background: rgba(234,179,8,0.1); color: #CA8A04; }
 
         .list-item {
           display: flex;
           align-items: flex-start;
           gap: 10px;
           padding: 9px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          border-bottom: 1px solid rgba(13,27,42,0.05);
           font-size: 14px;
-          color: rgba(232,237,245,0.75);
+          color: rgba(13,27,42,0.75);
           line-height: 1.5;
         }
         .list-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -526,9 +559,9 @@ export default function LookupPage() {
           flex-shrink: 0;
           margin-top: 8px;
         }
-        .list-bullet.red { background: #EF4444; }
-        .list-bullet.yellow { background: #EAB308; }
-        .list-bullet.green { background: #22C55E; }
+        .list-bullet.red { background: #DC2626; }
+        .list-bullet.yellow { background: #CA8A04; }
+        .list-bullet.green { background: #16A34A; }
 
         /* EMC badge */
         .emc-row {
@@ -541,16 +574,17 @@ export default function LookupPage() {
           font-size: 14px;
           font-weight: 500;
         }
-        .emc-allowed { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #4ADE80; }
-        .emc-banned { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #F87171; }
+        .emc-allowed { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #15803D; }
+        .emc-banned { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.18); color: #B91C1C; }
 
         /* ── Code Language section ── */
         .code-section {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: #ffffff;
+          border: 1px solid rgba(13,27,42,0.07);
           border-radius: 16px;
           margin-bottom: 16px;
           overflow: hidden;
+          box-shadow: 0 2px 12px rgba(13,27,42,0.05);
         }
         .code-header {
           display: flex;
@@ -561,7 +595,7 @@ export default function LookupPage() {
           transition: background 0.2s;
           user-select: none;
         }
-        .code-header:hover { background: rgba(255,255,255,0.02); }
+        .code-header:hover { background: rgba(24,95,165,0.03); }
         .code-header-left {
           display: flex;
           align-items: center;
@@ -569,7 +603,7 @@ export default function LookupPage() {
         }
         .code-icon {
           width: 36px; height: 36px;
-          background: rgba(24,95,165,0.2);
+          background: rgba(24,95,165,0.1);
           border-radius: 9px;
           display: flex; align-items: center; justify-content: center;
           font-size: 16px;
@@ -578,22 +612,22 @@ export default function LookupPage() {
         .code-header-title {
           font-size: 14px;
           font-weight: 600;
-          color: #E8EDF5;
+          color: #0D1B2A;
         }
         .code-header-sub {
           font-size: 12px;
-          color: rgba(232,237,245,0.35);
+          color: rgba(13,27,42,0.35);
           margin-top: 2px;
         }
         .code-chevron {
-          color: rgba(232,237,245,0.35);
+          color: rgba(13,27,42,0.3);
           transition: transform 0.25s;
           font-size: 18px;
         }
         .code-chevron.open { transform: rotate(180deg); }
 
         .code-body {
-          border-top: 1px solid rgba(255,255,255,0.06);
+          border-top: 1px solid rgba(13,27,42,0.06);
           overflow: hidden;
         }
 
@@ -614,24 +648,24 @@ export default function LookupPage() {
           transition: all 0.2s;
         }
         .tab-btn.active {
-          background: rgba(24,95,165,0.25);
-          border-color: rgba(74,159,232,0.35);
-          color: #4A9FE8;
+          background: rgba(24,95,165,0.1);
+          border-color: rgba(24,95,165,0.25);
+          color: #185FA5;
         }
         .tab-btn.inactive {
           background: transparent;
-          border-color: rgba(255,255,255,0.08);
-          color: rgba(232,237,245,0.45);
+          border-color: rgba(13,27,42,0.1);
+          color: rgba(13,27,42,0.4);
         }
         .tab-btn.inactive:hover {
-          color: rgba(232,237,245,0.7);
-          border-color: rgba(255,255,255,0.15);
+          color: rgba(13,27,42,0.7);
+          border-color: rgba(13,27,42,0.2);
         }
 
         .code-sections-list { padding: 16px 24px 24px; }
 
         .code-entry {
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid rgba(13,27,42,0.05);
           padding: 16px 0;
         }
         .code-entry:last-child { border-bottom: none; padding-bottom: 0; }
@@ -645,8 +679,8 @@ export default function LookupPage() {
           font-family: 'DM Mono', monospace;
           font-size: 11px;
           font-weight: 500;
-          color: #4A9FE8;
-          background: rgba(24,95,165,0.15);
+          color: #185FA5;
+          background: rgba(24,95,165,0.08);
           padding: 2px 8px;
           border-radius: 5px;
           flex-shrink: 0;
@@ -654,7 +688,7 @@ export default function LookupPage() {
         .code-entry-title {
           font-size: 13px;
           font-weight: 600;
-          color: rgba(232,237,245,0.65);
+          color: rgba(13,27,42,0.5);
           text-transform: uppercase;
           letter-spacing: 0.4px;
         }
@@ -662,16 +696,16 @@ export default function LookupPage() {
           font-family: 'DM Mono', monospace;
           font-size: 12.5px;
           line-height: 1.7;
-          color: rgba(232,237,245,0.65);
-          background: rgba(0,0,0,0.2);
-          border-left: 3px solid rgba(74,159,232,0.3);
+          color: rgba(13,27,42,0.65);
+          background: rgba(13,27,42,0.03);
+          border-left: 3px solid rgba(24,95,165,0.25);
           padding: 12px 16px;
           border-radius: 0 8px 8px 0;
         }
         .code-simplified {
           font-size: 14px;
           line-height: 1.65;
-          color: rgba(232,237,245,0.75);
+          color: rgba(13,27,42,0.75);
           background: rgba(34,197,94,0.04);
           border-left: 3px solid rgba(34,197,94,0.25);
           padding: 12px 16px;
@@ -693,14 +727,14 @@ export default function LookupPage() {
         }
         .contact-label {
           font-size: 13px;
-          color: rgba(232,237,245,0.45);
+          color: rgba(13,27,42,0.4);
           font-weight: 500;
           min-width: 130px;
         }
         .contact-value {
           font-size: 13px;
-          color: #E8EDF5;
-          font-weight: 500;
+          color: #0D1B2A;
+          font-weight: 600;
           text-align: right;
         }
 
@@ -708,10 +742,12 @@ export default function LookupPage() {
         .loading-wrap {
           text-align: center;
           padding: 56px 24px;
+          position: relative;
+          z-index: 1;
         }
         .spinner {
           width: 40px; height: 40px;
-          border: 3px solid rgba(74,159,232,0.2);
+          border: 3px solid rgba(24,95,165,0.15);
           border-top-color: #185FA5;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
@@ -721,16 +757,18 @@ export default function LookupPage() {
 
         /* ── Error ── */
         .error-box {
-          background: rgba(239,68,68,0.08);
-          border: 1px solid rgba(239,68,68,0.2);
+          background: rgba(239,68,68,0.07);
+          border: 1px solid rgba(239,68,68,0.18);
           border-radius: 12px;
           padding: 16px 20px;
-          color: #F87171;
+          color: #B91C1C;
           font-size: 14px;
           margin-top: 24px;
           max-width: 720px;
           margin-left: auto;
           margin-right: auto;
+          position: relative;
+          z-index: 1;
         }
 
         /* ── Practitioner notes ── */
@@ -738,13 +776,13 @@ export default function LookupPage() {
           display: flex;
           gap: 10px;
           padding: 10px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          border-bottom: 1px solid rgba(13,27,42,0.05);
           font-size: 13.5px;
-          color: rgba(232,237,245,0.65);
+          color: rgba(13,27,42,0.65);
           line-height: 1.55;
         }
         .note-item:last-child { border-bottom: none; }
-        .note-emoji { flex-shrink: 0; }
+        .note-emoji { flex-shrink: 0; color: #185FA5; }
 
         @media (max-width: 640px) {
           .search-grid { grid-template-columns: 1fr; }

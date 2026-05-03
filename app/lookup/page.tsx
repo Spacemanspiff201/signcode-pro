@@ -132,7 +132,7 @@ export default function LookupPage() {
       const res = await fetch(`/api/lookup?jurisdiction=${selectedJurisdiction}`);
       if (!res.ok) throw new Error('Lookup failed');
       const data = await res.json();
-      setResult(data);
+      setResult(data.data || data);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     } catch {
       setError('Could not load jurisdiction data. Please try again.');

@@ -233,7 +233,7 @@ export default function LookupPage() {
         .btn-nav:hover { background: #1a6fbe; }
 
         /* ── Hero ── */
-        .hero {
+        .hero { text-align: center;
           text-align: center;
           padding: 72px 24px 48px;
           position: relative;

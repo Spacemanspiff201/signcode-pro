@@ -312,16 +312,21 @@ export default function LookupPage() {
   const [codeOpen, setCodeOpen] = useState(false);
   const [section, setSection] = useState<'signs' | 'docs' | 'flags' | 'contacts' | 'code'>('signs');
   const resultRef = useRef<HTMLDivElement>(null);
+  const selectRef = useRef<HTMLSelectElement>(null);
 
   const handleLookup = async () => {
-    if (!selectedJurisdiction) return;
+    // Read from both React state AND the DOM ref as fallback
+    const jur = selectedJurisdiction || selectRef.current?.value || '';
+    if (!jur) return;
+    // Sync state if it was out of sync
+    if (!selectedJurisdiction && jur) setSelectedJurisdiction(jur);
     setLoading(true);
     setError('');
     setResult(null);
     setCodeOpen(false);
     setSection('signs');
     try {
-      const res = await fetch(`/api/lookup?jurisdiction=${selectedJurisdiction}`);
+      const res = await fetch(`/api/lookup?jurisdiction=${jur}`);
       if (!res.ok) throw new Error('Lookup failed');
       const json = await res.json();
       // API returns { success: true, data: {...} } — extract the data
@@ -399,15 +404,15 @@ export default function LookupPage() {
               </div>
               <div>
                 <div style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '7px' }}>Select Jurisdiction</div>
-                <select value={selectedJurisdiction} onChange={e => setSelectedJurisdiction(e.target.value)}
+                <select ref={selectRef} value={selectedJurisdiction} onChange={e => setSelectedJurisdiction(e.target.value)}
                   style={{ width: '100%', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', fontSize: '13px', color: selectedJurisdiction ? '#fff' : 'rgba(255,255,255,.4)', background: 'rgba(255,255,255,0.08)', cursor: 'pointer', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' as const }}>
                   <option value="">— Choose a city or county —</option>
                   {JURISDICTION_OPTIONS.map(o => <option key={o.value} value={o.value} style={{ background: '#1a2a3a', color: '#fff' }}>{o.label}</option>)}
                 </select>
               </div>
             </div>
-            <button className="lookup-btn" onClick={handleLookup} disabled={!selectedJurisdiction || loading}
-              style={{ width: '100%', padding: '13px', background: selectedJurisdiction && !loading ? '#185FA5' : 'rgba(255,255,255,0.07)', color: selectedJurisdiction ? '#fff' : 'rgba(255,255,255,.3)', border: 'none', borderRadius: '9px', fontSize: '14px', fontWeight: '700', cursor: selectedJurisdiction ? 'pointer' : 'not-allowed', fontFamily: 'inherit', boxShadow: selectedJurisdiction ? '0 4px 16px rgba(24,95,165,.4)' : 'none', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <button className="lookup-btn" onClick={handleLookup}
+              style={{ width: '100%', padding: '13px', background: '#185FA5', color: '#fff', border: 'none', borderRadius: '9px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(24,95,165,.4)', transition: 'all .2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               {loading
                 ? <><div style={{ width: '15px', height: '15px', border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />Pulling code data...</>
                 : '🔍 Run Permit Lookup'}

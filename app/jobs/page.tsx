@@ -22,7 +22,7 @@ const JURISDICTIONS = [
   { label: 'West Palm Beach', value: 'west-palm-beach' },
 ];
 
-function SignCard({ typeKey, rules }) {
+function SignCard({ typeKey, rules }: { typeKey: string; rules: Record<string, any> }) {
   const [open, setOpen] = useState(false);
   const labels = {
     wall: 'Wall Signs', channelLetters: 'Channel Letters', monument: 'Monument Signs',

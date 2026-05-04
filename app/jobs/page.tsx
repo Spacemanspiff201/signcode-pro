@@ -24,7 +24,7 @@ const JURISDICTIONS = [
 
 function SignCard({ typeKey, rules }: { typeKey: string; rules: Record<string, any> }) {
   const [open, setOpen] = useState(false);
-  const labels = {
+  const labels: Record<string, string> = {
     wall: 'Wall Signs', channelLetters: 'Channel Letters', monument: 'Monument Signs',
     pylon: 'Pylon / Pole Signs', awning: 'Awning Signs', projecting: 'Projecting Signs',
     window: 'Window Signs', emc: 'EMC / Digital Signs', temporary: 'Temporary Signs', directional: 'Directional Signs'
@@ -170,7 +170,7 @@ export default function LookupPage() {
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{d.districtCode} — {d.districtName}</div>
                   {d.overlay && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 2 }}>{d.overlay}</div>}
                 </div>
-                {Object.entries(d.signTypes).map(([k, v]) => <SignCard key={k} typeKey={k} rules={v} />)}
+                {Object.entries(d.signTypes as Record<string, Record<string, any>>).map(([k, v]) => <SignCard key={k} typeKey={k} rules={v} />)}
               </div>
             )) : (
               <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>

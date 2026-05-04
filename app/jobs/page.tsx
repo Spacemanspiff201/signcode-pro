@@ -1,104 +1,164 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const JURISDICTIONS = [
-  { label: 'Boca Raton', value: 'boca-raton' },
-  { label: 'Broward County (Unincorporated)', value: 'broward' },
-  { label: 'Coral Springs', value: 'coral-springs' },
-  { label: 'Deerfield Beach', value: 'deerfield-beach' },
-  { label: 'Delray Beach', value: 'delray-beach' },
-  { label: 'Fort Lauderdale', value: 'fort-lauderdale' },
-  { label: 'Hillsborough County', value: 'hillsborough' },
-  { label: 'Hollywood', value: 'hollywood' },
-  { label: 'Miami Beach', value: 'miami-beach' },
-  { label: 'Miami-Dade County', value: 'miami-dade' },
-  { label: 'Miramar', value: 'miramar' },
-  { label: 'Orlando', value: 'orlando' },
-  { label: 'Palm Beach County', value: 'palm-beach' },
-  { label: 'Pembroke Pines', value: 'pembroke-pines' },
-  { label: 'Pompano Beach', value: 'pompano-beach' },
-  { label: 'Sunrise', value: 'sunrise' },
-  { label: 'Tampa', value: 'tampa' },
-  { label: 'West Palm Beach', value: 'west-palm-beach' },
+type Status = 'Not Started' | 'In Progress' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected';
+
+interface Doc {
+  label: string;
+  done: boolean;
+}
+
+interface Job {
+  id: string;
+  name: string;
+  jurisdiction: string;
+  status: Status;
+  notes: string;
+  assignedTo: string;
+  targetDate: string;
+  submittedDate: string;
+  docs: Doc[];
+}
+
+const STATUS_COLORS: Record<Status, { bg: string; color: string }> = {
+  'Not Started':  { bg: '#F4F7FA', color: '#5A6B7A' },
+  'In Progress':  { bg: '#EFF6FF', color: '#1D4ED8' },
+  'Submitted':    { bg: '#FEF3C7', color: '#92400E' },
+  'Under Review': { bg: '#F3E8FF', color: '#7C3AED' },
+  'Approved':     { bg: '#DCFCE7', color: '#166534' },
+  'Rejected':     { bg: '#FEE2E2', color: '#B91C1C' },
+};
+
+const STATUSES: Status[] = ['Not Started', 'In Progress', 'Submitted', 'Under Review', 'Approved', 'Rejected'];
+
+const SAMPLE_JOBS: Job[] = [
+  {
+    id: '1', name: 'Publix #2241 — Monument Sign', jurisdiction: 'pompano-beach',
+    status: 'Under Review', notes: 'Waiting on AAC approval for Atlantic Blvd corridor.', assignedTo: 'Joe S.', targetDate: '2026-06-15', submittedDate: '2026-05-01',
+    docs: [
+      { label: 'Permit application', done: true }, { label: 'Structural drawings (PE sealed)', done: true },
+      { label: 'Site plan', done: true }, { label: 'MSP compliance docs', done: true },
+      { label: 'AAC approval', done: false }, { label: 'Owner authorization', done: true },
+    ],
+  },
+  {
+    id: '2', name: 'AutoNation — Channel Letters', jurisdiction: 'fort-lauderdale',
+    status: 'Submitted', notes: 'Contractor registration confirmed. Awaiting plan review.', assignedTo: 'Joe S.', targetDate: '2026-05-30', submittedDate: '2026-04-28',
+    docs: [
+      { label: 'Permit application', done: true }, { label: 'City contractor registration', done: true },
+      { label: 'Structural drawings', done: true }, { label: 'Electrical plans', done: true },
+      { label: 'Owner authorization', done: true },
+    ],
+  },
+  {
+    id: '3', name: 'Chick-fil-A — Pylon Sign', jurisdiction: 'boca-raton',
+    status: 'In Progress', notes: 'Waiting on DRB meeting date. EMC confirmed NOT included.', assignedTo: 'Joe S.', targetDate: '2026-08-01', submittedDate: '',
+    docs: [
+      { label: 'DRB approval', done: false }, { label: 'Color renderings for DRB', done: false },
+      { label: 'Permit application', done: false }, { label: 'Structural drawings', done: false },
+      { label: 'Material specs', done: true },
+    ],
+  },
+  {
+    id: '4', name: 'Walgreens — Wall Sign Reface', jurisdiction: 'miami-dade',
+    status: 'Approved', notes: 'Permit pulled. Installation scheduled 5/10.', assignedTo: 'Joe S.', targetDate: '2026-05-10', submittedDate: '2026-04-01',
+    docs: [
+      { label: 'Permit application', done: true }, { label: 'Engineer drawings (PE sealed)', done: true },
+      { label: 'Site plan', done: true }, { label: 'Shop inspection cert', done: true },
+      { label: 'Owner authorization', done: true },
+    ],
+  },
 ];
 
-function SignCard({ typeKey, rules }: { typeKey: string; rules: Record<string, any> }) {
-  const [open, setOpen] = useState(false);
-  const labels: Record<string, string> = {
-    wall: 'Wall Signs', channelLetters: 'Channel Letters', monument: 'Monument Signs',
-    pylon: 'Pylon / Pole Signs', awning: 'Awning Signs', projecting: 'Projecting Signs',
-    window: 'Window Signs', emc: 'EMC / Digital Signs', temporary: 'Temporary Signs', directional: 'Directional Signs'
-  };
-  const label = labels[typeKey] || typeKey;
-  const isBanned = (typeKey === 'pylon' && rules.simplifiedText?.toLowerCase().includes('prohibited')) || (typeKey === 'emc' && rules.emcAllowed === false);
-  const verified = rules.confidence === 'verified' || rules.confidence === 'high';
-  const hasTimeclock = rules.timeclockRequired !== undefined || rules.photocellRequired !== undefined || rules.astronomicalTimeclockRequired !== undefined;
+function JobCard({ job, onUpdate }: { job: Job; onUpdate: (j: Job) => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const statusStyle = STATUS_COLORS[job.status];
+  const doneDocs = job.docs.filter(d => d.done).length;
+
+  function toggleDoc(i: number) {
+    const newDocs = job.docs.map((d, idx) => idx === i ? { ...d, done: !d.done } : d);
+    onUpdate({ ...job, docs: newDocs });
+  }
+
   return (
-    <div style={{ border: `1px solid ${isBanned ? '#FECACA' : '#E2E8F0'}`, borderRadius: 10, marginBottom: 8, background: '#fff' }}>
-      <div onClick={() => setOpen(o => !o)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', cursor: 'pointer' }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: isBanned ? '#B91C1C' : '#0D1B2A' }}>{label}</div>
-          <div style={{ fontSize: 11, color: '#9BA8B4', marginTop: 2 }}>{isBanned ? 'NOT PERMITTED' : (rules.simplifiedText?.substring(0, 70) + '...') || 'Tap to expand'}</div>
+    <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E8EDF2', marginBottom: 10, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,.03)' }}>
+      <div onClick={() => setExpanded(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#0D1B2A', marginBottom: 3 }}>{job.name}</div>
+          <div style={{ fontSize: 12, color: '#9BA8B4' }}>{job.jurisdiction} · {doneDocs}/{job.docs.length} docs</div>
         </div>
-        <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 20, background: verified ? '#EAF3DE' : '#FEF3C7', color: verified ? '#27500A' : '#92400E', fontWeight: 700 }}>{verified ? 'Verified' : 'Verify at intake'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {job.targetDate && <div style={{ fontSize: 11, color: '#9BA8B4' }}>Due {job.targetDate}</div>}
+          <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: statusStyle.bg, color: statusStyle.color, whiteSpace: 'nowrap' }}>{job.status}</span>
+          <span style={{ fontSize: 12, color: '#C2C0B6' }}>{expanded ? '▲' : '▼'}</span>
+        </div>
       </div>
-      {open && (
-        <div style={{ borderTop: '1px solid #F4F7FA', padding: '14px 16px', fontSize: 13 }}>
-          {rules.maxStructureHeightFt !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max structure height</span><strong>{rules.maxStructureHeightFt} ft</strong></div>}
-          {rules.maxFaceAreaSqft !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max face area</span><strong>{rules.maxFaceAreaSqft} sq ft</strong></div>}
-          {rules.maxLetterHeightIn !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max letter height</span><strong>{rules.maxLetterHeightIn} in</strong></div>}
-          {rules.areaCalcMethod === 'per_linear_ft_frontage' && rules.areaCalcValue !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Area calc</span><strong>{rules.areaCalcValue} sq ft per linear ft of frontage</strong></div>}
-          {rules.maxPerTenant !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max per tenant</span><strong>{String(rules.maxPerTenant)}</strong></div>}
-          {rules.landscapingRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Landscaping at base</span><strong>{rules.landscapingRequired ? 'Required' : 'Not required'}</strong></div>}
-          {rules.tempMaxSqft !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Max size</span><strong>{rules.tempMaxSqft} sq ft</strong></div>}
-          {rules.illuminationAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Illumination</span><strong>{rules.illuminationAllowed ? 'Allowed' : 'Not allowed'}</strong></div>}
-          {rules.faceLitAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Face lit</span><strong>{rules.faceLitAllowed ? 'Allowed' : 'Not allowed'}</strong></div>}
-          {rules.reverseHaloLitAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Reverse / halo lit</span><strong>{rules.reverseHaloLitAllowed ? 'Allowed' : 'Not allowed'}</strong></div>}
-          {rules.openFaceNeonAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>Open face neon</span><strong>{rules.openFaceNeonAllowed ? 'Allowed' : 'Not allowed'}</strong></div>}
-          {hasTimeclock && (
-            <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '10px 12px', margin: '8px 0' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#92400E', textTransform: 'uppercase', marginBottom: 6 }}>Illumination Controls</div>
-              {rules.timeclockRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: 12, color: '#92400E' }}>Timeclock (city)</span><strong style={{ fontSize: 12, color: '#92400E' }}>{rules.timeclockRequired ? 'Required' : 'Not required'}</strong></div>}
-              {rules.photocellRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: 12, color: '#92400E' }}>Photocell</span><strong style={{ fontSize: 12, color: '#92400E' }}>{rules.photocellRequired ? 'Required' : 'Not required'}</strong></div>}
-              {rules.astronomicalTimeclockRequired !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: 12, color: '#92400E' }}>Astronomical timeclock</span><strong style={{ fontSize: 12, color: '#92400E' }}>{rules.astronomicalTimeclockRequired ? 'Required' : 'Not required'}</strong></div>}
+
+      {expanded && (
+        <div style={{ borderTop: '1px solid #F4F7FA', padding: '16px 20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Status</div>
+              <select value={job.status} onChange={e => onUpdate({ ...job, status: e.target.value as Status })} style={{ width: '100%', padding: '8px 10px', border: '1px solid #E8EDF2', borderRadius: 8, fontSize: 13, color: '#0D1B2A', background: '#fff', fontFamily: 'inherit' }}>
+                {STATUSES.map(s => <option key={s}>{s}</option>)}
+              </select>
             </div>
-          )}
-          {rules.emcAllowed !== undefined && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ color: '#5A6B7A' }}>EMC allowed</span><strong>{rules.emcAllowed ? 'Yes' : 'No - Prohibited'}</strong></div>}
-          {rules.simplifiedText && <div style={{ background: '#F0FDF4', borderLeft: '3px solid #86EFAC', padding: '10px 12px', marginTop: 8, lineHeight: 1.6 }}>{rules.simplifiedText}</div>}
-          {rules.verbatimText && <div style={{ background: '#F4F7FA', borderLeft: '3px solid #BFDBFE', padding: '10px 12px', marginTop: 6, fontSize: 12, color: '#5A6B7A', fontStyle: 'italic' }}>{rules.verbatimText}</div>}
-          {rules.notes && <div style={{ background: '#F4F7FA', borderRadius: 8, padding: '10px 12px', marginTop: 6, fontSize: 12, color: '#5A6B7A' }}>{rules.notes}</div>}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Assigned To</div>
+              <input value={job.assignedTo} onChange={e => onUpdate({ ...job, assignedTo: e.target.value })} style={{ width: '100%', padding: '8px 10px', border: '1px solid #E8EDF2', borderRadius: 8, fontSize: 13, color: '#0D1B2A', fontFamily: 'inherit' }} />
+            </div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Document Checklist ({doneDocs}/{job.docs.length})</div>
+            <div style={{ background: '#F4F7FA', borderRadius: 10, padding: '4px 8px' }}>
+              {job.docs.map((d, i) => (
+                <div key={i} onClick={() => toggleDoc(i)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 8px', cursor: 'pointer', borderBottom: i < job.docs.length - 1 ? '1px solid #E8EDF2' : 'none' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${d.done ? '#185FA5' : '#D1D5DB'}`, background: d.done ? '#185FA5' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {d.done && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                  </div>
+                  <span style={{ fontSize: 13, color: d.done ? '#9BA8B4' : '#0D1B2A', textDecoration: d.done ? 'line-through' : 'none' }}>{d.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>Notes</div>
+            <textarea value={job.notes} onChange={e => onUpdate({ ...job, notes: e.target.value })} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E8EDF2', borderRadius: 8, fontSize: 13, color: '#0D1B2A', fontFamily: 'inherit', resize: 'vertical', minHeight: 80 }} />
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-export default function LookupPage() {
-  const [jur, setJur] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState(null);
-  const [tab, setTab] = useState('signs');
+export default function JobsPage() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [filter, setFilter] = useState('All');
 
-  async function lookup() {
-    if (!jur) return;
-    setLoading(true);
-    setData(null);
-    setTab('signs');
+  useEffect(() => {
     try {
-      const res = await fetch('/api/lookup?jurisdiction=' + jur);
-      const json = await res.json();
-      setData(json.data || json);
-    } catch (e) {
-      console.error(e);
+      const saved = localStorage.getItem('signcode-jobs');
+      setJobs(saved ? (JSON.parse(saved) as Job[]) : SAMPLE_JOBS);
+    } catch {
+      setJobs(SAMPLE_JOBS);
     }
-    setLoading(false);
+  }, []);
+
+  function updateJob(updated: Job) {
+    const newJobs = jobs.map(j => j.id === updated.id ? updated : j);
+    setJobs(newJobs);
+    try { localStorage.setItem('signcode-jobs', JSON.stringify(newJobs)); } catch { /* ignore */ }
   }
 
-  const hasZoning = data && data.zoningDistricts && data.zoningDistricts.length > 0;
+  const filtered = filter === 'All' ? jobs : jobs.filter(j => j.status === filter);
+  const counts = STATUSES.reduce<Record<string, number>>((acc, s) => {
+    acc[s] = jobs.filter(j => j.status === s).length;
+    return acc;
+  }, {});
 
   return (
-    <div style={{ fontFamily: 'DM Sans, sans-serif', minHeight: '100vh', background: '#F4F7FA' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;}@keyframes glow{0%,100%{opacity:.4}50%{opacity:.7}}`}</style>
+    <div style={{ fontFamily: "'DM Sans', Arial, sans-serif", minHeight: '100vh', background: '#F4F7FA' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;}`}</style>
       <nav style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
@@ -106,116 +166,45 @@ export default function LookupPage() {
             <span style={{ fontSize: 15, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
           </a>
           <div style={{ display: 'flex', gap: 28 }}>
-            <a href="/lookup" style={{ fontSize: 13, color: '#185FA5', fontWeight: 600, textDecoration: 'none' }}>Lookup</a>
-            <a href="/jobs" style={{ fontSize: 13, color: '#5A6B7A', fontWeight: 500, textDecoration: 'none' }}>Jobs</a>
+            <a href="/lookup" style={{ fontSize: 13, color: '#5A6B7A', fontWeight: 500, textDecoration: 'none' }}>Lookup</a>
+            <a href="/jobs" style={{ fontSize: 13, color: '#185FA5', fontWeight: 600, textDecoration: 'none' }}>Jobs</a>
             <a href="/waitlist" style={{ fontSize: 13, color: '#5A6B7A', fontWeight: 500, textDecoration: 'none' }}>Waitlist</a>
           </div>
           <a href="/waitlist" style={{ padding: '8px 18px', background: '#185FA5', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Join waitlist</a>
         </div>
       </nav>
-      <div style={{ background: '#0D1B2A', padding: '52px 32px 60px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(ellipse,rgba(24,95,165,.12) 0%,transparent 65%)', animation: 'glow 6s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 12 }}>Look up any jurisdiction.<br /><span style={{ color: '#85B7EB' }}>In seconds, not hours.</span></h1>
-          <p style={{ fontSize: 15, color: 'rgba(255,255,255,.5)', lineHeight: 1.65, marginBottom: 32 }}>Sign codes by sign type, required docs, red flags, and contact info.</p>
-          <div style={{ background: 'rgba(255,255,255,.07)', borderRadius: 14, border: '1px solid rgba(255,255,255,.1)', padding: '22px 24px', maxWidth: 640 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Address Search <span style={{ background: '#F59E0B', color: '#fff', fontSize: 9, padding: '1px 5px', borderRadius: 20, fontWeight: 700 }}>SOON</span></div>
-                <input disabled placeholder="123 Main St..." style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,.1)', borderRadius: 7, fontSize: 13, color: 'rgba(255,255,255,.25)', background: 'rgba(255,255,255,.05)', cursor: 'not-allowed', fontFamily: 'inherit' }} />
-              </div>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>Select Jurisdiction</div>
-                <select value={jur} onChange={e => setJur(e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,.15)', borderRadius: 7, fontSize: 13, color: jur ? '#fff' : 'rgba(255,255,255,.4)', background: 'rgba(255,255,255,.08)', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}>
-                  <option value="">Choose a city or county</option>
-                  {JURISDICTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-            </div>
-            <button onClick={lookup} style={{ width: '100%', padding: 13, background: '#185FA5', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-              {loading ? 'Loading...' : 'Run Permit Lookup'}
-            </button>
-          </div>
+
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '40px 32px 64px' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#0D1B2A', letterSpacing: '-.5px', marginBottom: 6 }}>Job Tracker</h1>
+          <p style={{ fontSize: 14, color: '#5A6B7A' }}>Track every permit job from research to approval.</p>
         </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+          {(['All', ...STATUSES] as const).map(s => {
+            const count = s === 'All' ? jobs.length : (counts[s] ?? 0);
+            const active = filter === s;
+            return (
+              <button key={s} onClick={() => setFilter(s)} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 20, border: '1px solid', borderColor: active ? '#185FA5' : '#E2E8F0', background: active ? '#185FA5' : '#fff', color: active ? '#fff' : '#5A6B7A', cursor: 'pointer', fontFamily: 'inherit', fontWeight: active ? 700 : 400 }}>
+                {s}{count > 0 ? ` ${count}` : ''}
+              </button>
+            );
+          })}
+        </div>
+        {filtered.map(job => (
+          <JobCard key={job.id} job={job} onUpdate={updateJob} />
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '48px 0', color: '#9BA8B4' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📋</div>
+            <div style={{ fontSize: 14 }}>No jobs with status &quot;{filter}&quot;</div>
+          </div>
+        )}
       </div>
-      {loading && <div style={{ padding: 64, textAlign: 'center', color: '#5A6B7A', fontSize: 14 }}>Loading...</div>}
-      {data && !loading && (
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 32px 80px' }}>
-          <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0D1B2A', marginBottom: 4 }}>{data.jurisdiction}</h2>
-            <div style={{ fontSize: 12, color: '#9BA8B4', marginBottom: 10 }}>{data.county}{data.lastVerified && ` · Verified: ${data.lastVerified}`}</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-              {data.ownerSignatureRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FEF3C7', color: '#92400E', fontWeight: 700 }}>Owner sig required</span>}
-              {data.masterSignProgramRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>MSP required</span>}
-              {data.designReviewRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>Design review required</span>}
-              {data.contractorRegistrationRequired && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FCEBEB', color: '#791F1F', fontWeight: 700 }}>Contractor reg required</span>}
-              {data.emcAllowed === true && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#DCFCE7', color: '#15803D', fontWeight: 700 }}>EMC Allowed</span>}
-              {data.emcAllowed === false && <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>EMC Banned</span>}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, paddingTop: 12, borderTop: '1px solid #F4F7FA' }}>
-              {data.turnaround && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Turnaround</div><div style={{ fontSize: 12, fontWeight: 600 }}>{data.turnaround}</div></div>}
-              {data.fees && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Fees</div><div style={{ fontSize: 12, fontWeight: 600 }}>{data.fees}</div></div>}
-              {data.phone && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Phone</div><div style={{ fontSize: 12, fontWeight: 600 }}>{data.phone}</div></div>}
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-            {[{k:'signs',l:'Sign Types'},{k:'flags',l:`Red Flags (${data.redFlags ? data.redFlags.length : 0})`},{k:'docs',l:`Docs (${data.requiredDocs ? data.requiredDocs.length : 0})`},{k:'contacts',l:'Contacts'},{k:'code',l:'Code Language'}].map(({k,l}) => (
-              <button key={k} onClick={() => setTab(k)} style={{ fontSize: 12, padding: '6px 13px', borderRadius: 20, border: '1px solid', borderColor: tab===k?'#185FA5':'#E2E8F0', background: tab===k?'#185FA5':'#fff', color: tab===k?'#fff':'#5A6B7A', cursor: 'pointer', fontFamily: 'inherit', fontWeight: tab===k?700:400 }}>{l}</button>
-            ))}
-          </div>
-          {tab === 'signs' && (
-            hasZoning ? data.zoningDistricts.map((d, di) => (
-              <div key={di} style={{ marginBottom: 24 }}>
-                <div style={{ background: '#0D1B2A', borderRadius: 10, padding: '11px 16px', marginBottom: 10 }}>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{d.districtCode} — {d.districtName}</div>
-                  {d.overlay && <div style={{ fontSize: 11, color: 'rgba(255,255,255,.4)', marginTop: 2 }}>{d.overlay}</div>}
-                </div>
-                {Object.entries(d.signTypes as Record<string, Record<string, any>>).map(([k, v]) => <SignCard key={k} typeKey={k} rules={v} />)}
-              </div>
-            )) : (
-              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-                <div style={{ background: '#FEF3C7', borderRadius: 8, padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#92400E' }}>Full sign-type breakdown coming soon for this jurisdiction.</div>
-                {data.maxHeight && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Max height</span><strong>{data.maxHeight}</strong></div>}
-                {data.maxArea && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Max area</span><strong>{data.maxArea}</strong></div>}
-                {data.setback && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Setback</span><strong>{data.setback}</strong></div>}
-                {data.engineerSealRequired && <div style={{ marginTop: 8, background: '#FEF3C7', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#92400E' }}><strong>Engineer seal: </strong>{data.engineerSealRequired}</div>}
-              </div>
-            )
-          )}
-          {tab === 'flags' && (
-            <div>
-              {data.redFlags && data.redFlags.map((f, i) => <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid #FECACA', padding: '12px 16px', display: 'flex', gap: 10, marginBottom: 8 }}><span>🚩</span><span style={{ fontSize: 13, color: '#0D1B2A', lineHeight: 1.55 }}>{f}</span></div>)}
-              {data.practitionerNotes && data.practitionerNotes.map((n, i) => <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid #E2E8F0', padding: '11px 14px', display: 'flex', gap: 8, marginBottom: 6 }}><span style={{ color: '#185FA5', fontWeight: 700 }}>→</span><span style={{ fontSize: 13, color: '#5A6B7A' }}>{n}</span></div>)}
-            </div>
-          )}
-          {tab === 'docs' && (
-            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-              {data.requiredDocs && data.requiredDocs.map((d, i) => <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid #F4F7FA' }}><div style={{ width: 20, height: 20, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><span style={{ fontSize: 10, fontWeight: 700, color: '#185FA5' }}>{i+1}</span></div><span style={{ fontSize: 13 }}>{d}</span></div>)}
-            </div>
-          )}
-          {tab === 'contacts' && (
-            <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
-              {data.contacts && data.contacts.map((c, i) => <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #F4F7FA' }}><span style={{ fontSize: 13, color: '#5A6B7A' }}>{c.label}</span>{c.value.startsWith('http') ? <a href={c.value} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 700, color: '#185FA5', textDecoration: 'none' }}>Open portal</a> : <span style={{ fontSize: 13, fontWeight: 700 }}>{c.value}</span>}</div>)}
-            </div>
-          )}
-          {tab === 'code' && (
-            <div>
-              {data.codeLanguage && data.codeLanguage.map((cs, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E2E8F0', padding: '14px 16px', marginBottom: 8 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#185FA5', background: 'rgba(24,95,165,.07)', padding: '2px 7px', borderRadius: 5, display: 'inline-block', marginBottom: 6 }}>{cs.section}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#0D1B2A', marginBottom: 8 }}>{cs.title}</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.6, background: '#F0FDF4', borderLeft: '3px solid #86EFAC', padding: '10px 12px', marginBottom: 6 }}>{cs.simplified}</div>
-                  <div style={{ fontSize: 12, lineHeight: 1.65, color: '#5A6B7A', background: '#F4F7FA', borderLeft: '3px solid #BFDBFE', padding: '10px 12px', fontStyle: 'italic' }}>{cs.verbatim}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+
       <footer style={{ padding: '22px 32px', borderTop: '1px solid #E8EDF2', background: '#fff' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto' }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
-          <span style={{ fontSize: 11, color: '#B4B2A9' }}>2026 SignCode Pro</span>
+          <span style={{ fontSize: 11, color: '#B4B2A9' }}>© 2026 SignCode Pro</span>
         </div>
       </footer>
     </div>

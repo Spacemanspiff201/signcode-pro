@@ -1,16 +1,30 @@
 'use client';
+import { useState, useEffect } from 'react';
 
-import { useState, useRef, useEffect } from 'react';
+const CITY_MAP: Record<string, string> = {
+  'miami': 'miami-dade', 'hialeah': 'miami-dade', 'coral gables': 'miami-dade',
+  'doral': 'miami-dade', 'homestead': 'miami-dade', 'miami gardens': 'miami-dade',
+  'miami-dade': 'miami-dade', 'miami dade': 'miami-dade',
+  'hollywood': 'hollywood', 'pembroke pines': 'pembroke-pines',
+  'miramar': 'miramar', 'sunrise': 'sunrise', 'plantation': 'broward',
+  'davie': 'broward', 'weston': 'broward', 'deerfield beach': 'deerfield-beach',
+  'margate': 'broward', 'coral springs': 'coral-springs',
+  'pompano beach': 'pompano-beach', 'pompano': 'pompano-beach',
+  'fort lauderdale': 'fort-lauderdale', 'ft lauderdale': 'fort-lauderdale',
+  'boca raton': 'boca-raton', 'boca': 'boca-raton',
+  'delray beach': 'delray-beach', 'delray': 'delray-beach',
+  'west palm beach': 'west-palm-beach', 'west palm': 'west-palm-beach',
+  'palm beach': 'palm-beach', 'palm beach county': 'palm-beach',
+  'boynton beach': 'palm-beach', 'lake worth': 'palm-beach',
+  'wellington': 'palm-beach', 'jupiter': 'palm-beach',
+  'miami beach': 'miami-beach',
+  'orlando': 'orlando', 'tampa': 'tampa',
+  'brandon': 'hillsborough', 'riverview': 'hillsborough',
+  'hillsborough': 'hillsborough', 'hillsborough county': 'hillsborough',
+  'broward': 'broward', 'broward county': 'broward',
+};
 
-// ── Types ──────────────────────────────────────────────────────────────────
-interface CodeSection {
-  section: string;
-  title: string;
-  verbatim: string;
-  simplified: string;
-}
-
-interface JurisdictionResult {
+interface JurData {
   jurisdiction: string;
   county?: string;
   maxHeight?: string;
@@ -24,1015 +38,236 @@ interface JurisdictionResult {
   fees?: string;
   turnaround?: string;
   practitionerNotes?: string[];
-  codeLanguage?: CodeSection[];
-  rawData?: Record<string, unknown>;
+  codeLanguage?: { section: string; title: string; verbatim: string; simplified: string }[];
 }
 
-// ── City → jurisdiction key map ────────────────────────────────────────────
-const CITY_MAP: Record<string, string> = {
-  // Miami-Dade
-  'miami': 'miami-dade',
-  'miami-dade': 'miami-dade',
-  'miami dade': 'miami-dade',
-  'miami dade county': 'miami-dade',
-  // Broward
-  'broward': 'broward',
-  'broward county': 'broward',
-  'unincorporated broward': 'broward',
-  // Palm Beach
-  'palm beach': 'palm-beach',
-  'palm beach county': 'palm-beach',
-  // Fort Lauderdale
-  'fort lauderdale': 'fort-lauderdale',
-  'ft lauderdale': 'fort-lauderdale',
-  // Pompano Beach
-  'pompano beach': 'pompano-beach',
-  'pompano': 'pompano-beach',
-  // Boca Raton
-  'boca raton': 'boca-raton',
-  'boca': 'boca-raton',
-  // Miami Beach
-  'miami beach': 'miami-beach',
-  // Orlando
-  'orlando': 'orlando',
-  // Tampa
-  'tampa': 'tampa',
-  // Hillsborough
-  'hillsborough': 'hillsborough',
-  'hillsborough county': 'hillsborough',
-  // Southeast FL new 8
-  'hollywood': 'hollywood',
-  'deerfield beach': 'deerfield-beach',
-  'deerfield': 'deerfield-beach',
-  'pembroke pines': 'pembroke-pines',
-  'coral springs': 'coral-springs',
-  'miramar': 'miramar',
-  'west palm beach': 'west-palm-beach',
-  'west palm': 'west-palm-beach',
-  'delray beach': 'delray-beach',
-  'delray': 'delray-beach',
-  'sunrise': 'sunrise',
-};
-
-// ── Dropdown options (alphabetical) ───────────────────────────────────────
-const JURISDICTION_OPTIONS = [
-  { label: 'Boca Raton', value: 'boca-raton' },
-  { label: 'Broward County (Unincorporated)', value: 'broward' },
-  { label: 'Coral Springs', value: 'coral-springs' },
-  { label: 'Deerfield Beach', value: 'deerfield-beach' },
-  { label: 'Delray Beach', value: 'delray-beach' },
-  { label: 'Fort Lauderdale', value: 'fort-lauderdale' },
-  { label: 'Hillsborough County', value: 'hillsborough' },
-  { label: 'Hollywood', value: 'hollywood' },
-  { label: 'Miami Beach', value: 'miami-beach' },
-  { label: 'Miami-Dade County', value: 'miami-dade' },
-  { label: 'Miramar', value: 'miramar' },
-  { label: 'Orlando', value: 'orlando' },
-  { label: 'Palm Beach County', value: 'palm-beach' },
-  { label: 'Pembroke Pines', value: 'pembroke-pines' },
-  { label: 'Pompano Beach', value: 'pompano-beach' },
-  { label: 'Sunrise', value: 'sunrise' },
-  { label: 'Tampa', value: 'tampa' },
-  { label: 'West Palm Beach', value: 'west-palm-beach' },
-];
-
-// ── Small helpers ──────────────────────────────────────────────────────────
-function Badge({ children, color = 'blue' }: { children: React.ReactNode; color?: 'blue' | 'red' | 'green' | 'yellow' | 'gray' }) {
-  const colors = {
-    blue: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-    red: 'bg-red-500/15 text-red-300 border-red-500/30',
-    green: 'bg-green-500/15 text-green-300 border-green-500/30',
-    yellow: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
-    gray: 'bg-white/5 text-white/40 border-white/10',
-  };
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[color]}`}>
-      {children}
-    </span>
-  );
-}
-
-// ── Main Component ─────────────────────────────────────────────────────────
 export default function LookupPage() {
-  const [selectedJurisdiction, setSelectedJurisdiction] = useState('');
-  const [result, setResult] = useState<JurisdictionResult | null>(null);
+  const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<JurData | null>(null);
   const [error, setError] = useState('');
-  const [codeTab, setCodeTab] = useState<'verbatim' | 'simplified'>('simplified');
-  const [codeOpen, setCodeOpen] = useState(false);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState('overview');
 
-  const handleLookup = async () => {
-    if (!selectedJurisdiction) return;
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cityParam = params.get('city');
+    if (cityParam) {
+      setCity(cityParam);
+      doLookup(cityParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function doLookup(cityInput: string) {
+    const key = CITY_MAP[cityInput.toLowerCase().trim()];
+    if (!key) {
+      setError(`No data found for "${cityInput}". Try a city like Miami, Fort Lauderdale, or Boca Raton.`);
+      setData(null);
+      return;
+    }
     setLoading(true);
     setError('');
-    setResult(null);
-    setCodeOpen(false);
+    setData(null);
+    setTab('overview');
     try {
-      const res = await fetch(`/api/lookup?jurisdiction=${selectedJurisdiction}`);
-      if (!res.ok) throw new Error('Lookup failed');
-      const data = await res.json();
-      setResult(data.data || data);
-      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+      const res = await fetch(`/api/lookup?jurisdiction=${key}`);
+      const json = await res.json();
+      if (!res.ok) { setError(json.error || 'Something went wrong.'); return; }
+      setData(json);
     } catch {
-      setError('Could not load jurisdiction data. Please try again.');
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleLookup();
-  };
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (city.trim()) doLookup(city);
+  }
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+    <div style={{ fontFamily: "'DM Sans', Arial, sans-serif", minHeight: '100vh', background: '#F4F7FA' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;}@keyframes glow{0%,100%{opacity:.4}50%{opacity:.7}}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-          background: #0A1628;
-          font-family: 'DM Sans', sans-serif;
-          color: #E8EDF5;
-          min-height: 100vh;
-        }
-
-        .page-wrap {
-          min-height: 100vh;
-          background: #0A1628;
-          padding-bottom: 80px;
-        }
-
-        /* ── Top bar ── */
-        .topbar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 18px 32px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          background: rgba(10,22,40,0.95);
-          backdrop-filter: blur(12px);
-          position: sticky;
-          top: 0;
-          z-index: 50;
-        }
-        .logo-mark {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 3px;
-          width: 28px;
-          height: 28px;
-        }
-        .logo-sq {
-          border-radius: 3px;
-          background: #185FA5;
-        }
-        .logo-sq.check {
-          position: relative;
-          background: #185FA5;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .logo-sq.check::after {
-          content: '✓';
-          font-size: 9px;
-          color: white;
-          font-weight: 700;
-        }
-        .logo-text {
-          font-size: 17px;
-          font-weight: 700;
-          color: #E8EDF5;
-          letter-spacing: -0.3px;
-          margin-left: 10px;
-        }
-        .logo-text span { color: #4A9FE8; }
-        .nav-links { display: flex; gap: 24px; align-items: center; }
-        .nav-link {
-          font-size: 14px;
-          color: rgba(232,237,245,0.55);
-          text-decoration: none;
-          transition: color 0.2s;
-          font-weight: 500;
-        }
-        .nav-link:hover { color: #E8EDF5; }
-        .nav-link.active { color: #4A9FE8; }
-        .btn-nav {
-          background: #185FA5;
-          color: white;
-          border: none;
-          padding: 8px 18px;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          font-family: 'DM Sans', sans-serif;
-          transition: background 0.2s;
-        }
-        .btn-nav:hover { background: #1a6fbe; }
-
-        /* ── Hero ── */
-        .hero { text-align: center;
-          text-align: center;
-          padding: 72px 24px 48px;
-          position: relative;
-          overflow: hidden;
-        }
-        .hero::before {
-          content: '';
-          position: absolute;
-          top: -60px; left: 50%; transform: translateX(-50%);
-          width: 700px; height: 400px;
-          background: radial-gradient(ellipse at center, rgba(24,95,165,0.18) 0%, transparent 70%);
-          pointer-events: none;
-        }
-        .hero-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(24,95,165,0.15);
-          border: 1px solid rgba(74,159,232,0.25);
-          border-radius: 100px;
-          padding: 5px 14px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #4A9FE8;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          margin-bottom: 20px;
-        }
-        .hero-title {
-          font-size: clamp(32px, 5vw, 52px);
-          font-weight: 700;
-          line-height: 1.12;
-          letter-spacing: -1.5px;
-          color: #E8EDF5;
-          margin-bottom: 16px;
-        }
-        .hero-title em {
-          font-style: normal;
-          background: linear-gradient(135deg, #4A9FE8 0%, #185FA5 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .hero-sub {
-          font-size: 17px;
-          color: rgba(232,237,245,0.55);
-          max-width: 540px;
-          margin: 0 auto 44px;
-          line-height: 1.6;
-          font-weight: 400;
-        }
-
-        /* ── Search area ── */
-        .search-wrap {
-          max-width: 720px;
-          margin: 0 auto;
-          padding: 0 24px;
-        }
-        .search-card {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.09);
-          border-radius: 20px;
-          padding: 28px;
-          backdrop-filter: blur(12px);
-        }
-        .search-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-          margin-bottom: 14px;
-        }
-        .input-label {
-          font-size: 11px;
-          font-weight: 600;
-          color: rgba(232,237,245,0.4);
-          letter-spacing: 0.8px;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-        .coming-soon-pill {
-          background: rgba(255,193,7,0.15);
-          border: 1px solid rgba(255,193,7,0.3);
-          color: #FFC107;
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          padding: 2px 7px;
-          border-radius: 100px;
-        }
-        .address-input {
-          width: 100%;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 11px;
-          padding: 13px 16px;
-          font-size: 14px;
-          color: rgba(232,237,245,0.3);
-          font-family: 'DM Sans', sans-serif;
-          cursor: not-allowed;
-          outline: none;
-        }
-        .address-input::placeholder { color: rgba(232,237,245,0.2); }
-        .select-input {
-          width: 100%;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(74,159,232,0.2);
-          border-radius: 11px;
-          padding: 13px 16px;
-          font-size: 14px;
-          color: #E8EDF5;
-          font-family: 'DM Sans', sans-serif;
-          cursor: pointer;
-          outline: none;
-          appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A9FE8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 14px center;
-          padding-right: 42px;
-          transition: border-color 0.2s;
-        }
-        .select-input:focus { border-color: rgba(74,159,232,0.6); }
-        .select-input option { background: #0D1B2A; color: #E8EDF5; }
-
-        .btn-lookup {
-          width: 100%;
-          background: linear-gradient(135deg, #185FA5 0%, #1a6fbe 100%);
-          color: white;
-          border: none;
-          padding: 14px;
-          border-radius: 11px;
-          font-size: 15px;
-          font-weight: 600;
-          cursor: pointer;
-          font-family: 'DM Sans', sans-serif;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          box-shadow: 0 4px 20px rgba(24,95,165,0.35);
-        }
-        .btn-lookup:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 6px 28px rgba(24,95,165,0.5);
-        }
-        .btn-lookup:disabled {
-          opacity: 0.45;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        /* ── Stats row ── */
-        .stats-row {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 28px;
-          margin-top: 20px;
-          flex-wrap: wrap;
-        }
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-size: 13px;
-          color: rgba(232,237,245,0.4);
-        }
-        .stat-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          background: #185FA5;
-          flex-shrink: 0;
-        }
-
-        /* ── Result card ── */
-        .results-wrap {
-          max-width: 860px;
-          margin: 48px auto 0;
-          padding: 0 24px;
-        }
-        .result-header {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          margin-bottom: 28px;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-        .result-title {
-          font-size: 26px;
-          font-weight: 700;
-          letter-spacing: -0.6px;
-          color: #E8EDF5;
-        }
-        .result-subtitle {
-          font-size: 14px;
-          color: rgba(232,237,245,0.4);
-          margin-top: 4px;
-          font-weight: 400;
-        }
-        .result-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-        /* Info grid */
-        .info-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 14px;
-          margin-bottom: 24px;
-        }
-        .info-tile {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 14px;
-          padding: 18px;
-          transition: border-color 0.2s;
-        }
-        .info-tile:hover { border-color: rgba(74,159,232,0.2); }
-        .tile-label {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.8px;
-          text-transform: uppercase;
-          color: rgba(232,237,245,0.35);
-          margin-bottom: 6px;
-        }
-        .tile-value {
-          font-size: 20px;
-          font-weight: 700;
-          color: #4A9FE8;
-          letter-spacing: -0.5px;
-          line-height: 1.2;
-        }
-        .tile-note {
-          font-size: 11px;
-          color: rgba(232,237,245,0.35);
-          margin-top: 4px;
-          line-height: 1.4;
-        }
-
-        /* Section card */
-        .section-card {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 16px;
-          padding: 22px 24px;
-          margin-bottom: 16px;
-        }
-        .section-title {
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.8px;
-          text-transform: uppercase;
-          color: rgba(232,237,245,0.35);
-          margin-bottom: 14px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .section-title-icon {
-          width: 20px; height: 20px;
-          border-radius: 5px;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 11px;
-          flex-shrink: 0;
-        }
-        .icon-blue { background: rgba(24,95,165,0.25); color: #4A9FE8; }
-        .icon-red { background: rgba(239,68,68,0.15); color: #F87171; }
-        .icon-green { background: rgba(34,197,94,0.12); color: #4ADE80; }
-        .icon-yellow { background: rgba(234,179,8,0.12); color: #FACC15; }
-
-        .list-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 9px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-          font-size: 14px;
-          color: rgba(232,237,245,0.75);
-          line-height: 1.5;
-        }
-        .list-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .list-bullet {
-          width: 5px; height: 5px;
-          border-radius: 50%;
-          background: #185FA5;
-          flex-shrink: 0;
-          margin-top: 8px;
-        }
-        .list-bullet.red { background: #EF4444; }
-        .list-bullet.yellow { background: #EAB308; }
-        .list-bullet.green { background: #22C55E; }
-
-        /* EMC badge */
-        .emc-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 14px 18px;
-          border-radius: 11px;
-          margin-bottom: 14px;
-          font-size: 14px;
-          font-weight: 500;
-        }
-        .emc-allowed { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #4ADE80; }
-        .emc-banned { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #F87171; }
-
-        /* ── Code Language section ── */
-        .code-section {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 16px;
-          margin-bottom: 16px;
-          overflow: hidden;
-        }
-        .code-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 18px 24px;
-          cursor: pointer;
-          transition: background 0.2s;
-          user-select: none;
-        }
-        .code-header:hover { background: rgba(255,255,255,0.02); }
-        .code-header-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .code-icon {
-          width: 36px; height: 36px;
-          background: rgba(24,95,165,0.2);
-          border-radius: 9px;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 16px;
-          flex-shrink: 0;
-        }
-        .code-header-title {
-          font-size: 14px;
-          font-weight: 600;
-          color: #E8EDF5;
-        }
-        .code-header-sub {
-          font-size: 12px;
-          color: rgba(232,237,245,0.35);
-          margin-top: 2px;
-        }
-        .code-chevron {
-          color: rgba(232,237,245,0.35);
-          transition: transform 0.25s;
-          font-size: 18px;
-        }
-        .code-chevron.open { transform: rotate(180deg); }
-
-        .code-body {
-          border-top: 1px solid rgba(255,255,255,0.06);
-          overflow: hidden;
-        }
-
-        /* Tab toggle */
-        .tab-toggle {
-          display: flex;
-          gap: 4px;
-          padding: 16px 24px 0;
-        }
-        .tab-btn {
-          padding: 7px 16px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 600;
-          font-family: 'DM Sans', sans-serif;
-          border: 1px solid transparent;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .tab-btn.active {
-          background: rgba(24,95,165,0.25);
-          border-color: rgba(74,159,232,0.35);
-          color: #4A9FE8;
-        }
-        .tab-btn.inactive {
-          background: transparent;
-          border-color: rgba(255,255,255,0.08);
-          color: rgba(232,237,245,0.45);
-        }
-        .tab-btn.inactive:hover {
-          color: rgba(232,237,245,0.7);
-          border-color: rgba(255,255,255,0.15);
-        }
-
-        .code-sections-list { padding: 16px 24px 24px; }
-
-        .code-entry {
-          border-bottom: 1px solid rgba(255,255,255,0.05);
-          padding: 16px 0;
-        }
-        .code-entry:last-child { border-bottom: none; padding-bottom: 0; }
-        .code-entry-header {
-          display: flex;
-          align-items: baseline;
-          gap: 10px;
-          margin-bottom: 8px;
-        }
-        .code-section-num {
-          font-family: 'DM Mono', monospace;
-          font-size: 11px;
-          font-weight: 500;
-          color: #4A9FE8;
-          background: rgba(24,95,165,0.15);
-          padding: 2px 8px;
-          border-radius: 5px;
-          flex-shrink: 0;
-        }
-        .code-entry-title {
-          font-size: 13px;
-          font-weight: 600;
-          color: rgba(232,237,245,0.65);
-          text-transform: uppercase;
-          letter-spacing: 0.4px;
-        }
-        .code-verbatim {
-          font-family: 'DM Mono', monospace;
-          font-size: 12.5px;
-          line-height: 1.7;
-          color: rgba(232,237,245,0.65);
-          background: rgba(0,0,0,0.2);
-          border-left: 3px solid rgba(74,159,232,0.3);
-          padding: 12px 16px;
-          border-radius: 0 8px 8px 0;
-        }
-        .code-simplified {
-          font-size: 14px;
-          line-height: 1.65;
-          color: rgba(232,237,245,0.75);
-          background: rgba(34,197,94,0.04);
-          border-left: 3px solid rgba(34,197,94,0.25);
-          padding: 12px 16px;
-          border-radius: 0 8px 8px 0;
-        }
-
-        /* ── Contacts ── */
-        .contacts-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .contact-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        .contact-label {
-          font-size: 13px;
-          color: rgba(232,237,245,0.45);
-          font-weight: 500;
-          min-width: 130px;
-        }
-        .contact-value {
-          font-size: 13px;
-          color: #E8EDF5;
-          font-weight: 500;
-          text-align: right;
-        }
-
-        /* ── Loading ── */
-        .loading-wrap {
-          text-align: center;
-          padding: 56px 24px;
-        }
-        .spinner {
-          width: 40px; height: 40px;
-          border: 3px solid rgba(74,159,232,0.2);
-          border-top-color: #185FA5;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          margin: 0 auto 16px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Error ── */
-        .error-box {
-          background: rgba(239,68,68,0.08);
-          border: 1px solid rgba(239,68,68,0.2);
-          border-radius: 12px;
-          padding: 16px 20px;
-          color: #F87171;
-          font-size: 14px;
-          margin-top: 24px;
-          max-width: 720px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        /* ── Practitioner notes ── */
-        .note-item {
-          display: flex;
-          gap: 10px;
-          padding: 10px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-          font-size: 13.5px;
-          color: rgba(232,237,245,0.65);
-          line-height: 1.55;
-        }
-        .note-item:last-child { border-bottom: none; }
-        .note-emoji { flex-shrink: 0; }
-
-        @media (max-width: 640px) {
-          .search-grid { grid-template-columns: 1fr; }
-          .topbar { padding: 14px 18px; }
-          .nav-links { gap: 14px; }
-          .result-header { flex-direction: column; }
-          .info-grid { grid-template-columns: 1fr 1fr; }
-        }
-      `}</style>
-
-      <div className="page-wrap">
-        {/* Top bar */}
-        <nav className="topbar">
-          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: 0 }}>
-            <div className="logo-mark">
-              <div className="logo-sq" />
-              <div className="logo-sq" />
-              <div className="logo-sq" />
-              <div className="logo-sq check" />
-            </div>
-            <span className="logo-text">Sign<span>Code</span> Pro</span>
+      {/* NAV */}
+      <nav style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', height: 62, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+            <svg width="26" height="26" viewBox="0 0 80 80"><rect width="80" height="80" rx="14" fill="#185FA5"/><rect x="10" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="10" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="10" y="46" width="24" height="24" rx="5" fill="#fff" fillOpacity=".22"/><rect x="46" y="46" width="24" height="24" rx="5" fill="#fff"/><path d="M50 60l4 4 8-9" stroke="#185FA5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
           </a>
-          <div className="nav-links">
-            <a href="/lookup" className="nav-link active">Lookup</a>
-            <a href="/jobs" className="nav-link">Jobs</a>
-            <a href="/waitlist" className="nav-link">Waitlist</a>
-            <button className="btn-nav" onClick={() => window.location.href = '/waitlist'}>Get Beta Access</button>
+          <div style={{ display: 'flex', gap: 28 }}>
+            <a href="/lookup" style={{ fontSize: 13, color: '#185FA5', fontWeight: 600, textDecoration: 'none' }}>Lookup</a>
+            <a href="/jobs" style={{ fontSize: 13, color: '#5A6B7A', fontWeight: 500, textDecoration: 'none' }}>Jobs</a>
+            <a href="/waitlist" style={{ fontSize: 13, color: '#5A6B7A', fontWeight: 500, textDecoration: 'none' }}>Waitlist</a>
           </div>
-        </nav>
+          <a href="/waitlist" style={{ padding: '8px 18px', background: '#185FA5', color: '#fff', borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Join waitlist</a>
+        </div>
+      </nav>
 
-        {/* Hero */}
-        <section className="hero">
-          <div className="hero-eyebrow">
-            <span>⚡</span> Florida Sign Permit Intelligence
-          </div>
-          <h1 className="hero-title">
-            Look up any jurisdiction.<br />
-            <em>In seconds, not hours.</em>
-          </h1>
-          <p className="hero-sub">
-            Sign codes, required docs, red flags, and real contact info — researched and verified for Florida's most active markets.
-          </p>
-        </section>
-
-        {/* Search card */}
-        <div className="search-wrap">
-          <div className="search-card">
-            <div className="search-grid">
-              {/* Address search — coming soon */}
-              <div>
-                <div className="input-label">
-                  📍 Address Search
-                  <span className="coming-soon-pill">Coming Soon</span>
-                </div>
-                <input
-                  className="address-input"
-                  type="text"
-                  placeholder="123 Main St, Fort Lauderdale, FL…"
-                  disabled
-                />
-              </div>
-
-              {/* Jurisdiction dropdown */}
-              <div>
-                <div className="input-label">
-                  🗂 Select Jurisdiction
-                </div>
-                <select
-                  className="select-input"
-                  value={selectedJurisdiction}
-                  onChange={e => setSelectedJurisdiction(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                >
-                  <option value="">— Choose a city or county —</option>
-                  {JURISDICTION_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+      {/* SEARCH HEADER */}
+      <div style={{ background: '#0D1B2A', padding: '52px 32px 60px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 800, height: 400, background: 'radial-gradient(ellipse,rgba(24,95,165,.12) 0%,transparent 65%)', animation: 'glow 6s ease-in-out infinite', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-1.5px', lineHeight: 1.1, marginBottom: 12 }}>Look up any jurisdiction.<br /><span style={{ color: '#85B7EB' }}>In seconds, not hours.</span></h1>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,.5)', lineHeight: 1.65, marginBottom: 32 }}>Sign codes by sign type, required docs, red flags, and contact info.</p>
+          <form onSubmit={handleSubmit}>
+            <div style={{ background: 'rgba(255,255,255,.07)', borderRadius: 14, border: '1px solid rgba(255,255,255,.1)', padding: '22px 24px', maxWidth: 640 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10 }}>City or County</label>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Miami, Fort Lauderdale, Boca Raton..." style={{ flex: 1, padding: '12px 16px', borderRadius: 9, border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.08)', color: '#fff', fontSize: 14, outline: 'none' }} />
+                <button type="submit" disabled={loading} style={{ padding: '12px 28px', background: '#185FA5', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  {loading ? 'Looking up...' : 'Look up'}
+                </button>
               </div>
             </div>
-
-            <button
-              className="btn-lookup"
-              onClick={handleLookup}
-              disabled={!selectedJurisdiction || loading}
-            >
-              {loading ? (
-                <>
-                  <span style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
-                  Looking up…
-                </>
-              ) : (
-                <>🔍 Run Permit Lookup</>
-              )}
-            </button>
-          </div>
-
-          {/* Stats row */}
-          <div className="stats-row">
-            <div className="stat-item"><span className="stat-dot" />18 jurisdictions covered</div>
-            <div className="stat-item"><span className="stat-dot" />Verified sign code data</div>
-            <div className="stat-item"><span className="stat-dot" />Real-world practitioner notes</div>
-            <div className="stat-item"><span className="stat-dot" />Verbatim ordinance text</div>
-          </div>
+          </form>
         </div>
+      </div>
 
-        {/* Error */}
-        {error && <div className="error-box">⚠️ {error}</div>}
-
-        {/* Loading */}
-        {loading && (
-          <div className="loading-wrap">
-            <div className="spinner" />
-            <p style={{ color: 'rgba(232,237,245,0.4)', fontSize: 14 }}>Pulling jurisdiction data…</p>
+      {/* RESULTS */}
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '32px 32px 64px' }}>
+        {error && (
+          <div style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 12, padding: '16px 20px', color: '#92400E', fontSize: 14, marginBottom: 24 }}>
+            {error}
           </div>
         )}
 
-        {/* Results */}
-        {result && !loading && (
-          <div className="results-wrap" ref={resultRef}>
-            {/* Header */}
-            <div className="result-header">
-              <div>
-                <div className="result-title">{result.jurisdiction}</div>
-                {result.county && <div className="result-subtitle">{result.county}</div>}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#9BA8B4', fontSize: 14 }}>
+            <div style={{ width: 32, height: 32, border: '3px solid #E8EDF2', borderTopColor: '#185FA5', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+            Looking up jurisdiction data...
+          </div>
+        )}
+
+        {data && !loading && (
+          <div>
+            {/* Header card */}
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E8EDF2', padding: '20px 24px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+                <div>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0D1B2A', marginBottom: 4 }}>{data.jurisdiction}</h2>
+                  {data.county && <div style={{ fontSize: 13, color: '#9BA8B4' }}>{data.county}</div>}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {data.emcAllowed === false && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>EMC Banned</span>}
+                  {data.emcAllowed === true && <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: '#DCFCE7', color: '#166534', fontWeight: 700 }}>EMC Allowed</span>}
+                </div>
               </div>
-              <div className="result-badges">
-                {result.emcAllowed === true && <Badge color="green">✓ EMC Allowed</Badge>}
-                {result.emcAllowed === false && <Badge color="red">✗ EMC Banned</Badge>}
-                {result.turnaround && <Badge color="blue">⏱ {result.turnaround}</Badge>}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, paddingTop: 12, borderTop: '1px solid #F4F7FA' }}>
+                {data.turnaround && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Turnaround</div><div style={{ fontSize: 13, fontWeight: 600 }}>{data.turnaround}</div></div>}
+                {data.fees && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Fees</div><div style={{ fontSize: 13, fontWeight: 600 }}>{data.fees}</div></div>}
+                {data.maxHeight && <div><div style={{ fontSize: 10, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', marginBottom: 2 }}>Max Height</div><div style={{ fontSize: 13, fontWeight: 600 }}>{data.maxHeight}</div></div>}
               </div>
             </div>
 
-            {/* Key numbers */}
-            <div className="info-grid">
-              {result.maxHeight && (
-                <div className="info-tile">
-                  <div className="tile-label">Max Height</div>
-                  <div className="tile-value">{result.maxHeight}</div>
-                </div>
-              )}
-              {result.maxArea && (
-                <div className="info-tile">
-                  <div className="tile-label">Max Sign Area</div>
-                  <div className="tile-value">{result.maxArea}</div>
-                </div>
-              )}
-              {result.setback && (
-                <div className="info-tile">
-                  <div className="tile-label">Setback</div>
-                  <div className="tile-value">{result.setback}</div>
-                </div>
-              )}
-              {result.fees && (
-                <div className="info-tile">
-                  <div className="tile-label">Permit Fees</div>
-                  <div className="tile-value" style={{ fontSize: 16 }}>{result.fees}</div>
-                </div>
-              )}
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+              {[
+                { k: 'overview', l: 'Overview' },
+                { k: 'flags', l: `Red Flags (${data.redFlags?.length ?? 0})` },
+                { k: 'docs', l: `Docs (${data.requiredDocs?.length ?? 0})` },
+                { k: 'contacts', l: 'Contacts' },
+                { k: 'code', l: 'Code Language' },
+              ].map(({ k, l }) => (
+                <button key={k} onClick={() => setTab(k)} style={{ fontSize: 12, padding: '6px 14px', borderRadius: 20, border: '1px solid', borderColor: tab === k ? '#185FA5' : '#E2E8F0', background: tab === k ? '#185FA5' : '#fff', color: tab === k ? '#fff' : '#5A6B7A', cursor: 'pointer', fontFamily: 'inherit', fontWeight: tab === k ? 700 : 400 }}>{l}</button>
+              ))}
             </div>
 
-            {/* EMC note */}
-            {result.emcNotes && (
-              <div className={`emc-row ${result.emcAllowed ? 'emc-allowed' : 'emc-banned'}`}>
-                <span>{result.emcAllowed ? '✅' : '🚫'}</span>
-                <span>{result.emcNotes}</span>
-              </div>
-            )}
-
-            {/* Red flags */}
-            {result.redFlags && result.redFlags.length > 0 && (
-              <div className="section-card">
-                <div className="section-title">
-                  <div className="section-title-icon icon-red">🚩</div>
-                  Red Flags & Watch Items
-                </div>
-                {result.redFlags.map((flag, i) => (
-                  <div key={i} className="list-item">
-                    <div className="list-bullet red" />
-                    <span>{flag}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Required docs */}
-            {result.requiredDocs && result.requiredDocs.length > 0 && (
-              <div className="section-card">
-                <div className="section-title">
-                  <div className="section-title-icon icon-blue">📋</div>
-                  Required Documents
-                </div>
-                {result.requiredDocs.map((doc, i) => (
-                  <div key={i} className="list-item">
-                    <div className="list-bullet" />
-                    <span>{doc}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Contacts */}
-            {result.contacts && result.contacts.length > 0 && (
-              <div className="section-card">
-                <div className="section-title">
-                  <div className="section-title-icon icon-green">📞</div>
-                  Contacts & Portals
-                </div>
-                <div className="contacts-grid">
-                  {result.contacts.map((c, i) => (
-                    <div key={i} className="contact-row">
-                      <span className="contact-label">{c.label}</span>
-                      <span className="contact-value">{c.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Practitioner notes */}
-            {result.practitionerNotes && result.practitionerNotes.length > 0 && (
-              <div className="section-card">
-                <div className="section-title">
-                  <div className="section-title-icon icon-yellow">🔧</div>
-                  Field Notes
-                </div>
-                {result.practitionerNotes.map((note, i) => (
-                  <div key={i} className="note-item">
-                    <span className="note-emoji">→</span>
-                    <span>{note}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* ── Official Code Language ── */}
-            {result.codeLanguage && result.codeLanguage.length > 0 && (
-              <div className="code-section">
-                <div className="code-header" onClick={() => setCodeOpen(o => !o)}>
-                  <div className="code-header-left">
-                    <div className="code-icon">📜</div>
-                    <div>
-                      <div className="code-header-title">Official Code Language</div>
-                      <div className="code-header-sub">{result.codeLanguage.length} ordinance sections · verbatim + plain English</div>
-                    </div>
-                  </div>
-                  <span className={`code-chevron ${codeOpen ? 'open' : ''}`}>⌄</span>
-                </div>
-
-                {codeOpen && (
-                  <div className="code-body">
-                    <div className="tab-toggle">
-                      <button
-                        className={`tab-btn ${codeTab === 'simplified' ? 'active' : 'inactive'}`}
-                        onClick={() => setCodeTab('simplified')}
-                      >
-                        ✏️ Plain English
-                      </button>
-                      <button
-                        className={`tab-btn ${codeTab === 'verbatim' ? 'active' : 'inactive'}`}
-                        onClick={() => setCodeTab('verbatim')}
-                      >
-                        ⚖️ Verbatim Code
-                      </button>
-                    </div>
-
-                    <div className="code-sections-list">
-                      {result.codeLanguage.map((cs, i) => (
-                        <div key={i} className="code-entry">
-                          <div className="code-entry-header">
-                            <span className="code-section-num">{cs.section}</span>
-                            <span className="code-entry-title">{cs.title}</span>
-                          </div>
-                          {codeTab === 'verbatim' ? (
-                            <div className="code-verbatim">{cs.verbatim}</div>
-                          ) : (
-                            <div className="code-simplified">{cs.simplified}</div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+            {/* Overview tab */}
+            {tab === 'overview' && (
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
+                {data.maxHeight && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Max height</span><strong>{data.maxHeight}</strong></div>}
+                {data.maxArea && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Max area</span><strong>{data.maxArea}</strong></div>}
+                {data.setback && <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F4F7FA', fontSize: 13 }}><span style={{ color: '#5A6B7A' }}>Setback</span><strong>{data.setback}</strong></div>}
+                {data.emcNotes && <div style={{ marginTop: 12, background: data.emcAllowed === false ? '#FEE2E2' : '#F0FDF4', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: data.emcAllowed === false ? '#B91C1C' : '#166534' }}>{data.emcNotes}</div>}
+                {data.practitionerNotes && data.practitionerNotes.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#9BA8B4', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 10 }}>Practitioner Notes</div>
+                    {data.practitionerNotes.map((n, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                        <span style={{ color: '#185FA5', fontWeight: 700 }}>→</span>
+                        <span style={{ fontSize: 13, color: '#5A6B7A', lineHeight: 1.6 }}>{n}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             )}
+
+            {/* Flags tab */}
+            {tab === 'flags' && (
+              <div>
+                {data.redFlags?.map((f, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: 10, border: '1px solid #FECACA', padding: '12px 16px', display: 'flex', gap: 10, marginBottom: 8 }}>
+                    <span>🚩</span><span style={{ fontSize: 13, color: '#0D1B2A', lineHeight: 1.55 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Docs tab */}
+            {tab === 'docs' && (
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
+                {data.requiredDocs?.map((d, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, padding: '8px 0', borderBottom: '1px solid #F4F7FA' }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#185FA5' }}>{i + 1}</span>
+                    </div>
+                    <span style={{ fontSize: 13 }}>{d}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Contacts tab */}
+            {tab === 'contacts' && (
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #E2E8F0', padding: '20px 24px' }}>
+                {data.contacts?.map((c, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid #F4F7FA' }}>
+                    <span style={{ fontSize: 13, color: '#5A6B7A' }}>{c.label}</span>
+                    {c.value.startsWith('http') || c.value.includes('.gov') || c.value.includes('.com') ? (
+                      <a href={`https://${c.value.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 700, color: '#185FA5', textDecoration: 'none' }}>Open portal</a>
+                    ) : (
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>{c.value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Code tab */}
+            {tab === 'code' && (
+              <div>
+                {data.codeLanguage?.map((cs, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: 12, border: '1px solid #E2E8F0', padding: '16px 18px', marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#185FA5', background: 'rgba(24,95,165,.07)', padding: '2px 8px', borderRadius: 5, display: 'inline-block', marginBottom: 6 }}>{cs.section}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A', marginBottom: 10 }}>{cs.title}</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.65, background: '#F0FDF4', borderLeft: '3px solid #86EFAC', padding: '10px 14px', marginBottom: 8, borderRadius: '0 6px 6px 0' }}>{cs.simplified}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.65, color: '#5A6B7A', background: '#F4F7FA', borderLeft: '3px solid #BFDBFE', padding: '10px 14px', fontStyle: 'italic', borderRadius: '0 6px 6px 0' }}>{cs.verbatim}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!data && !loading && !error && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#9BA8B4' }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>🔍</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#5A6B7A', marginBottom: 8 }}>Search a Florida city or county above</div>
+            <div style={{ fontSize: 13 }}>Miami, Fort Lauderdale, Boca Raton, Tampa, Orlando and more</div>
           </div>
         )}
       </div>
-    </>
+
+      <footer style={{ padding: '22px 32px', borderTop: '1px solid #E8EDF2', background: '#fff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#0D1B2A' }}>Sign<span style={{ color: '#185FA5' }}>Code</span> Pro</span>
+          <span style={{ fontSize: 11, color: '#B4B2A9' }}>© 2026 SignCode Pro</span>
+        </div>
+      </footer>
+    </div>
   );
 }
